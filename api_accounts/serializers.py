@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from api_accounts.models import User
 
 

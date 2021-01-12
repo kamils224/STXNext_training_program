@@ -1,4 +1,5 @@
 from typing import Dict
+
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -26,17 +27,17 @@ class UserAccountTest(APITestCase):
         return self.client.post(url, user_data, format="json")
 
     def test_register(self):
-
         response = self._user_data_post(self.user_data, self.register_url)
+        expected_users_count = 1
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(User.objects.count(), expected_users_count)
         self.assertEqual(User.objects.get().email, self.user_data["email"])
 
         # try to create the same user again
         response = self._user_data_post(self.user_data, self.register_url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(User.objects.count(), expected_users_count)
 
     def test_short_password(self):
         user_data = self.user_data
@@ -61,7 +62,8 @@ class UserAccountTest(APITestCase):
         response = self._user_data_post(self.user_data, self.obtain_token_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue("access" in response.data and "refresh" in response.data)
+        self.assertTrue(
+            "access" in response.data and "refresh" in response.data)
 
     def test_login_inactive(self):
         _ = self._user_data_post(self.user_data, self.register_url)
