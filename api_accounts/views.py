@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from api_accounts.models import User
 from api_accounts.serializers import UserRegistrationSerializer, UserSerializer
+from mailer.mailing_service import BaseMailer
 
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -20,15 +21,15 @@ class UserRegistrationView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = UserRegistrationSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            if user:
-                # TODO: add email message with verification url
-                return Response(
-                    {"message": "Registration successful, check your email!"},
-                    status=status.HTTP_201_CREATED,
-                )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        if user:
+            # TODO: add email message with verification url
 
+            return Response(
+                {"message": "Registration successful, check your email!"},
+                status=status.HTTP_201_CREATED,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
