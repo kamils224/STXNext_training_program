@@ -1,4 +1,5 @@
 # STXNext_training_program
+Create .env.dev file based on .env-template
 
 Perform makemigrations:
 
