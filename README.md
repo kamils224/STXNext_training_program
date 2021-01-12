@@ -17,5 +17,6 @@ Run docker:
 `docker-compose up` or `docker-compose up --build`
 
 If migration errors occur, remove your database volumes and try again.
+`sudo docker-compose down --rmi all --volumes`
 
 *TODO*
