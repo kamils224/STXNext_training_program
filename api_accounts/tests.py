@@ -1,4 +1,5 @@
 from typing import Dict
+
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -26,7 +27,7 @@ class UserAccountTest(APITestCase):
     def test_register(self):
         response = self._post_register(self.user_data)
         expected_users_count = 1
-        
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.count(), expected_users_count)
         self.assertEqual(User.objects.get().email, self.user_data["email"])
