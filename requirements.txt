@@ -22,6 +22,7 @@ mypy-extensions==0.4.3
 pathspec==0.8.1
 prompt-toolkit==3.0.9
 PyJWT==2.0.0
+psycopg2-binary==2.8.6
 pylint==2.6.0
 pytz==2020.5
 regex==2020.11.13
