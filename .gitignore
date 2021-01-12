@@ -82,6 +82,7 @@ celerybeat-schedule
 
 # dotenv
 .env
+.env.dev
 
 # virtualenv
 .venv
@@ -107,6 +108,3 @@ media/
 *.pyc
 *.db
 *.pid
-
-# env variables
-.env.dev
