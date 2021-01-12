@@ -26,3 +26,4 @@ class UserRegistrationView(CreateAPIView):
                 {"message": "Registration successful, check your email!"},
                 status=status.HTTP_201_CREATED,
             )
+        return Response({"message": "Could not create an user"}, status=status.HTTP_400_BAD_REQUEST)
