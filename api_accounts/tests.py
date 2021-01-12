@@ -27,13 +27,13 @@ class UserAccountTest(APITestCase):
         response = self._post_register(self.user_data)
         expected_users_count = 1
         
-        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.count(), expected_users_count)
         self.assertEqual(User.objects.get().email, self.user_data["email"])
 
         # try to create the same user again
         response = self._post_register(self.user_data)
-        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), expected_users_count)
 
     def test_short_password(self):
@@ -47,5 +47,5 @@ class UserAccountTest(APITestCase):
     def test_bad_email_register(self):
         response = self._post_register(self.bad_email_data)
 
-        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), 0)
