@@ -15,3 +15,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             validated_data["email"], validated_data["password"]
         )
         return user
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["email"]
