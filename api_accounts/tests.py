@@ -59,7 +59,7 @@ class UserAccountTest(APITestCase):
         self.assertEqual(User.objects.count(), expected_users_count)
 
     def test_login(self):
-        _ = self._user_data_post(self.user_data, self.REGISTER_URL)
+        self._user_data_post(self.user_data, self.REGISTER_URL)
         # set user as active
         user = User.objects.first()
         user.is_active = True
@@ -71,14 +71,14 @@ class UserAccountTest(APITestCase):
             "access" in response.data and "refresh" in response.data)
 
     def test_login_inactive(self):
-        _ = self._user_data_post(self.user_data, self.REGISTER_URL)
+        self._user_data_post(self.user_data, self.REGISTER_URL)
         response = self._user_data_post(self.user_data, self.OBTAIN_TOKEN_URL)
 
         # user should be inactive after registration
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_user_details(self):
-        _ = self._user_data_post(self.user_data, self.REGISTER_URL)
+        self._user_data_post(self.user_data, self.REGISTER_URL)
         # set user as active
         user = User.objects.first()
         user.is_active = True
@@ -91,3 +91,9 @@ class UserAccountTest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["email"], user.email)
+
+
+    def test_user_details_fail(self):
+        response = self.client.get(self.USER_DETAILS_URL)
+        
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
