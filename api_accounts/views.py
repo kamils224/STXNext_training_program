@@ -28,3 +28,11 @@ class UserRegistrationView(CreateAPIView):
             {"message": f"Registration successful, check your email: {user.email}"},
             status=status.HTTP_201_CREATED,
         )
+
+
+class UserDetailsView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, format=None):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
