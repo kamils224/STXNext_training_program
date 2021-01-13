@@ -90,4 +90,4 @@ class UserAccountTest(APITestCase):
         response = self.client.get(self.USER_DETAILS_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['email'], user.email)
+        self.assertEqual(response.data["email"], user.email)
