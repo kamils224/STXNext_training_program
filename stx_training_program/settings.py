@@ -161,8 +161,6 @@ STATIC_URL = "/static/"
 
 # mailing service
 EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-EMAIL_DEBUG_MODE = os.environ.get("EMAIL_DEBUG_MODE", default=False)
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-SENDGRID_SANDBOX_MODE_IN_DEBUG = EMAIL_DEBUG_MODE
 FROM_EMAIL = os.environ.get("SENDGRID_FROM_EMAIL",
                             default="onedevhub@gmail.com")
