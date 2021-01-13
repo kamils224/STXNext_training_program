@@ -23,6 +23,6 @@ class UserRegistrationView(CreateAPIView):
         user = serializer.save()
         # TODO: add mailing service here
         return Response(
-            {"message": f"Registration successful, check your email adress: {user.email}"},
+            {"message": f"Registration successful, check your email: {user.email}"},
             status=status.HTTP_201_CREATED,
         )
