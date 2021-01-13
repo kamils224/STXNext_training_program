@@ -20,19 +20,11 @@ class UserRegistrationView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = UserRegistrationSerializer(data=request.data)
+        # Errors are handled inside serializer
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        if user:
-            # TODO: add email message with verification url
-            return Response(
-                {"message": "Registration successful, check your email!"},
-                status=status.HTTP_201_CREATED,
-            )
-
-
-class UserDetailsView(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, format=None):
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # TODO: add mailing service here
+        return Response(
+            {"message": f"Registration successful, check your email: {user.email}"},
+            status=status.HTTP_201_CREATED,
+        )
