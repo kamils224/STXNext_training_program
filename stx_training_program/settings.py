@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "accounts",
+    "api_accounts",
 ]
 
 MIDDLEWARE = [
@@ -70,6 +72,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "stx_training_program.wsgi.application"
+
+
+AUTH_USER_MODEL = "accounts.User"
 
 
 # Database
