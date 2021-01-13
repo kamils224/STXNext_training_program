@@ -19,11 +19,9 @@ class UserRegistrationView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        # Errors are handled inside serializer
         user = serializer.save()
-        if user:
-            # TODO: add email message with verification url
-            return Response(
-                {"message": "Registration successful, check your email!"},
-                status=status.HTTP_201_CREATED,
-            )
-        return Response({"message": "Could not create an user"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"message": f"Registration successful, check your email adress {user.email}"},
+            status=status.HTTP_201_CREATED,
+        )
