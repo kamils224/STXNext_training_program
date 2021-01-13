@@ -18,10 +18,11 @@ class UserRegistrationView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = UserRegistrationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
         # Errors are handled inside serializer
+        serializer.is_valid(raise_exception=True)
         user = serializer.save()
+        # TODO: add mailing service here
         return Response(
-            {"message": f"Registration successful, check your email adress {user.email}"},
+            {"message": f"Registration successful, check your email adress: {user.email}"},
             status=status.HTTP_201_CREATED,
         )
