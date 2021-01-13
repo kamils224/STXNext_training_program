@@ -1,8 +1,7 @@
 from rest_framework import status
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from api_accounts.models import User
 from api_accounts.serializers import UserRegistrationSerializer, UserSerializer
@@ -32,13 +31,15 @@ class UserRegistrationView(CreateAPIView):
         )
 
 
-class UserDetailsView(APIView):
+class UserDetailsView(RetrieveAPIView):
     """
-    An endpoint for user details.
+    An endpoint for user details. 
+    Returns data based on the currently logged user, without providing his id/pk in URL.
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = UserSerializer
 
-    def get(self, request, format=None):
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_object(self):
+        serializer = UserSerializer(self.request.user)
+        return serializer.data
