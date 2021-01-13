@@ -33,7 +33,7 @@ class UserRegistrationView(CreateAPIView):
 
 
 class UserDetailsView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
         serializer = UserSerializer(request.user)
