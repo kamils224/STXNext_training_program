@@ -33,6 +33,9 @@ class UserRegistrationView(CreateAPIView):
 
 
 class UserDetailsView(APIView):
+    """
+    An endpoint for user details.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
