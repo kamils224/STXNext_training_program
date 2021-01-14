@@ -1,17 +1,41 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
-class IsOwnerOrMemberReadOnly(BasePermission):
+class IsOwner(BasePermission):
     """
-    Object-level permission to only allow owners of an object to edit it and members to view it.
-    Assumes the model instance has an `owner` and `members` attribute.
+    Object-level permission to only allow owners of an object to edit it.
     """
 
     def has_object_permission(self, request, view, obj):
         # Instance must have an attribute named `owner`.
-        if obj.owner == request.user:
-            return True
-        if request.method in SAFE_METHODS:
-            # Instance must have an attribute named `members`.
-            return request.user in obj.members.all()
-        return False
+        return obj.owner == request.user
+
+
+class MemberReadOnly(BasePermission):
+    """
+    Object-level permission to only allow members of an object to view it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Instance must have an attribute named `members`.
+        return request.method in SAFE_METHODS and request.user in obj.members.all()
+
+
+class CanViewIssues(BasePermission):
+    """
+    Checks if current user is member or owner of the project.
+    """
+
+    def has_permission(self, request, view, pk=None):
+        # nested project id
+        pk = view.kwargs["pk"]
+
+        projects = request.user.projects.filter(pk=pk)
+        own_projects = request.user.own_projects.filter(pk=pk)
+        return not projects and not own_projects
+
+
+class IsProjectMember(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        # Instance must have an attribute named `project`.
+        return obj.project in request.user.projects.all()
