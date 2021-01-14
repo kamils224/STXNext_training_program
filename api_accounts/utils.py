@@ -5,7 +5,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from rest_framework.request import Request
-from rest_framework.reverse import reverse_lazy
+from rest_framework.reverse import reverse
 
 
 __all__ = ["VerificationTokenGenerator", "send_verification_email"]
@@ -19,19 +19,20 @@ class VerificationTokenGenerator(PasswordResetTokenGenerator):
         return str(user.pk) + str(timestamp) + str(user.is_active)
 
 
-VERIFICATION_URL = reverse_lazy("api_accounts:activate")
-ACTIVATION_SUBJECT = "Activate your account"
-FROM_EMAIL = settings.FROM_EMAIL
-
-
-def send_verification_email(user: User, request: Request) -> None:
+def send_verification_email(user: User, request: Request,
+                            subject: str = "Verify your email", message: str = "") -> None:
     token_generator = VerificationTokenGenerator()
     token = token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
 
+    message += _create_activation_url(uid, token, request)
+    # The sender is set in DEFAULT_FROM_EMAIL in settings.py
+    send_mail(subject, message, None, recipient_list=[user.email], fail_silently=False)
+
+
+def _create_activation_url(uid: str, token: str, request: Request) -> str:
+    endpoint = reverse("api_accounts:activate")
     protocol = "https" if request.is_secure() else "http"
     host = request.get_host()
 
-    activation_link = f"{protocol}://{host}{VERIFICATION_URL}?uid={uid}&token={token}"
-    message = f"Hello {user.email}, please verify your email here:\n {activation_link}"
-    send_mail(ACTIVATION_SUBJECT, message, FROM_EMAIL, [user.email])
+    return f"{protocol}://{host}{endpoint}?uid={uid}&token={token}"

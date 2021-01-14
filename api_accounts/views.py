@@ -28,7 +28,8 @@ class UserRegistrationView(CreateAPIView):
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        send_verification_email(user, request)
+        send_verification_email(user, request,
+                                subject="Training course", message="Hello! Activate your account here:\n")
         return Response({"message": f"Registration successful, check your email: {user}"},
                         status=status.HTTP_201_CREATED)
 
