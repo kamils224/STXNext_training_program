@@ -1,9 +1,10 @@
+from django.db.models import Q
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 
 from api_projects.models import Project
 from api_projects.serializers import ProjectSerializer
-from api_projects.permissions import IsOwnerOrReadOnly
+from api_projects.permissions import IsOwnerOrMemberReadOnly
 
 """
 "Endpoints for:
@@ -14,10 +15,12 @@ from api_projects.permissions import IsOwnerOrReadOnly
 Project should consist of name, owner and creation date"
 """
 
+
 class ProjectViewSet(ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated, IsOwnerOrMemberReadOnly]
 
     def get_queryset(self):
-        return Project.objects.filter(members__contains=request.user)
+        user = self.request.user
+        return Project.objects.filter(Q(members=user) | Q(owner=user)).distinct()
