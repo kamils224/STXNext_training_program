@@ -16,6 +16,7 @@ class UserAccountTest(APITestCase):
     REGISTER_URL = reverse_lazy("api_accounts:register")
     OBTAIN_TOKEN_URL = reverse_lazy("api_accounts:token_obtain_pair")
     USER_DETAILS_URL = reverse_lazy("api_accounts:user_details")
+    ACCOUNT_ACTIVATE_URL = reverse_lazy("api_accounts:activate")
 
     def setUp(self):
 
@@ -101,3 +102,9 @@ class UserAccountTest(APITestCase):
         response = self.client.get(self.USER_DETAILS_URL)
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_account_activate_fail(self):
+        print(self.ACCOUNT_ACTIVATE_URL)
+        response = self.client.get(self.ACCOUNT_ACTIVATE_URL, {"uid": "1", "token": "anytoken"})
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
