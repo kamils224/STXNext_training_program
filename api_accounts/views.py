@@ -3,7 +3,7 @@ from django.utils.encoding import force_bytes, force_text
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
@@ -26,10 +26,15 @@ class UserRegistrationView(CreateAPIView):
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        send_verification_email(user,
-                                request,
-                                subject="Training course",
-                                message="Hello! Activate your account here:\n")
+        success = send_verification_email(
+            user,
+            request,
+            subject="Training course",
+            message="Hello! Activate your account here:\n"
+        )
+        if not success:
+            User.objects.delete(user)
+            return Response({"error": "Something went wrong!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({"message": f"Registration successful, check your email: {user}"},
                         status=status.HTTP_201_CREATED)
@@ -40,7 +45,7 @@ class UserDetailsView(RetrieveAPIView):
     An endpoint for user details. 
     Returns data based on the currently logged user, without providing his id/pk in URL.
     """
-    
+
     serializer_class = UserSerializer
 
     def get_object(self):
@@ -49,7 +54,11 @@ class UserDetailsView(RetrieveAPIView):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def activate_account(request):
+    """
+    An endpoint for activating account. Verifies if given credentials match any user.
+    """
     uid = request.query_params.get("uid")
     token = request.query_params.get("token")
 
