@@ -21,12 +21,4 @@ If migration errors occur, remove your database volumes and try again.
 
 `sudo docker-compose down --rmi all --volumes`
 
-Set sendgrid api key:
-
-`export SENDGRID_API_KEY=<your api key>`
-
-Set email sender:
-
-`export SENDGRID_FROM_EMAIL=<example@mail.com>`
-
 *TODO*
