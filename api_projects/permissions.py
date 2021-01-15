@@ -26,13 +26,12 @@ class CanViewIssues(BasePermission):
     Checks if current user is member or owner of the project.
     """
 
-    def has_permission(self, request, view, pk=None):
-        # nested project id
+    def has_permission(self, request, view):
+        # project id
         pk = view.kwargs["pk"]
-
-        projects = request.user.projects.filter(pk=pk)
-        own_projects = request.user.own_projects.filter(pk=pk)
-        return not projects and not own_projects
+        projects = request.user.projects.filter(pk=pk).exists()
+        own_projects = request.user.own_projects.filter(pk=pk).exists()
+        return projects or own_projects
 
 
 class IsProjectMember(BasePermission):
