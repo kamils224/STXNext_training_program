@@ -61,7 +61,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
 }
 
 # settings from https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
