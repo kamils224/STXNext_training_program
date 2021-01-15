@@ -6,7 +6,7 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from rest_framework.request import Request
 from rest_framework.reverse import reverse
-
+from smtplib import SMTPException
 
 __all__ = ["VerificationTokenGenerator", "send_verification_email"]
 
@@ -20,20 +20,16 @@ class VerificationTokenGenerator(PasswordResetTokenGenerator):
 
 
 def send_verification_email(user: User, request: Request,
-                            subject: str = "Verify your email", message: str = "") -> bool:
+                            subject: str = "Verify your email", message: str = "") -> None:
     token_generator = VerificationTokenGenerator()
     token = token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
 
     message += _create_activation_url(uid, token, request)
 
-    try:
-        # The sender is set in DEFAULT_FROM_EMAIL in settings.py
-        send_mail(subject, message, None, recipient_list=[
-                  user.email], fail_silently=False)
-        return True
-    except:
-        return False
+    # The sender is set in DEFAULT_FROM_EMAIL in settings.py
+    send_mail(subject, message, None, recipient_list=[
+              user.email], fail_silently=False)
 
 
 def _create_activation_url(uid: str, token: str, request: Request) -> str:
