@@ -6,8 +6,7 @@ from django.contrib.auth.base_user import BaseUserManager
 class EmailUsernameUserManager(BaseUserManager):
     def create_user(self, email, password=None):
         """
-        Creates and saves a User with the given email, date of
-        birth and password.
+        Creates and saves a User with the given email and password.
         """
         if not email:
             raise ValueError("Users must have an email address")
@@ -22,8 +21,7 @@ class EmailUsernameUserManager(BaseUserManager):
 
     def create_superuser(self, email, password=None):
         """
-        Creates and saves a superuser with the given email, date of
-        birth and password.
+        Creates and saves a superuser with the given email and password.
         """
         user = self.create_user(
             email,
@@ -42,7 +40,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=255,
         unique=True,
     )
-    is_active = models.BooleanField(default=False)  # requires email verification
+    # requires email verification
+    is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
 
     objects = EmailUsernameUserManager()

@@ -2,12 +2,10 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_text
 from django.contrib.auth import get_user_model
 from rest_framework import status
-from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.decorators import api_view
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 
 from api_accounts.models import User
@@ -28,18 +26,26 @@ class UserRegistrationView(CreateAPIView):
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        send_verification_email(user, request,
-                                subject="Training course", message="Hello! Activate your account here:\n")
+        send_verification_email(user,
+                                request,
+                                subject="Training course",
+                                message="Hello! Activate your account here:\n")
+
         return Response({"message": f"Registration successful, check your email: {user}"},
                         status=status.HTTP_201_CREATED)
 
 
-class UserDetailsView(APIView):
-    permission_classes = [IsAuthenticated]
+class UserDetailsView(RetrieveAPIView):
+    """
+    An endpoint for user details. 
+    Returns data based on the currently logged user, without providing his id/pk in URL.
+    """
+    
+    serializer_class = UserSerializer
 
-    def get(self, request, format=None):
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_object(self):
+        serializer = UserSerializer(self.request.user)
+        return serializer.data
 
 
 @api_view(['GET'])

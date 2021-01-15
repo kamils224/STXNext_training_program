@@ -1,9 +1,11 @@
+from django.core.validators import MinLengthValidator
 from rest_framework import serializers
+
 from api_accounts.models import User
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(min_length=8)
+    password = serializers.CharField(validators=[MinLengthValidator(8)])
 
     class Meta:
         model = User
@@ -15,6 +17,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             validated_data["email"], validated_data["password"]
         )
         return user
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
