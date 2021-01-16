@@ -1,10 +1,12 @@
 from typing import Dict
 
 from django.contrib.auth import get_user_model
+from django.core import mail
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework.test import APITestCase
 from rest_framework.response import Response
+
 
 User = get_user_model()
 
@@ -14,6 +16,7 @@ class UserAccountTest(APITestCase):
     REGISTER_URL = reverse_lazy("api_accounts:register")
     OBTAIN_TOKEN_URL = reverse_lazy("api_accounts:token_obtain_pair")
     USER_DETAILS_URL = reverse_lazy("api_accounts:user_details")
+    ACCOUNT_ACTIVATE_URL = reverse_lazy("api_accounts:activate")
 
     def setUp(self):
 
@@ -30,17 +33,20 @@ class UserAccountTest(APITestCase):
         return self.client.post(url, user_data, format="json")
 
     def test_register(self):
-        expected_users_count = User.objects.count() + 1
         response = self._user_data_post(self.user_data, self.REGISTER_URL)
+        expected_obj_count = 1
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(User.objects.count(), expected_users_count)
+        self.assertEqual(User.objects.count(), expected_obj_count)
         self.assertEqual(User.objects.get().email, self.user_data["email"])
 
         # try to create the same user again
         response = self._user_data_post(self.user_data, self.REGISTER_URL)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(User.objects.count(), expected_users_count)
+        self.assertEqual(User.objects.count(), expected_obj_count)
+
+        # there should be a new message
+        self.assertEqual(len(mail.outbox), expected_obj_count)
 
     def test_short_password(self):
         expected_users_count = User.objects.count()
@@ -92,8 +98,12 @@ class UserAccountTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["email"], user.email)
 
-
     def test_user_details_fail(self):
         response = self.client.get(self.USER_DETAILS_URL)
-        
+
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_account_activate_fail(self):
+        response = self.client.get(self.ACCOUNT_ACTIVATE_URL, {"uid": "1", "token": "anytoken"})
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
