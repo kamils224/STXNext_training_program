@@ -55,11 +55,7 @@ class ActivateAccountView(RetrieveAPIView):
     permission_classes = [AllowAny]
 
     def get(self, request, format=None):
-        uid = request.query_params.get("uid")
-        token = request.query_params.get("token")
-        data = {"uid": uid, "token": token}
-
-        serializer = ActivateAccountSerializer(data=data)
+        serializer = ActivateAccountSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
         user.is_active = True
