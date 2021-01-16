@@ -104,7 +104,6 @@ class UserAccountTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_account_activate_fail(self):
-        print(self.ACCOUNT_ACTIVATE_URL)
         response = self.client.get(self.ACCOUNT_ACTIVATE_URL, {"uid": "1", "token": "anytoken"})
         
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
