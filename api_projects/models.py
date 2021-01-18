@@ -1,6 +1,10 @@
 from django.db import models
 from django.db.models import F, Q
 from django.contrib.auth import get_user_model
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from api_projects.tasks import user_created
 
 
 User = get_user_model()
@@ -40,3 +44,8 @@ class Issue(models.Model):
 
     def __str__(self):
         return self.title
+
+
+@receiver(post_save, sender=User, dispatch_uid="create_info")
+def user_created_info(sender, instance, created, **kwargs):
+    user_created.delay()
