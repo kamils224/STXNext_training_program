@@ -29,11 +29,11 @@ class UserAccountTest(APITestCase):
             "password": "password123",
         }
 
-    def _user_data_post(self, user_data: Dict[str, str], url: str) -> Response:
-        return self.client.post(url, user_data, format="json")
+    def _register_user(user_data: Dict[str, str]) -> Response:
+        return self.client.post(self.REGISTER_URL, user_data, format="json")
 
     def test_register(self):
-        response = self._user_data_post(self.user_data, self.REGISTER_URL)
+        response = self._register_user(self.user_data)
         expected_obj_count = 1
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -41,7 +41,7 @@ class UserAccountTest(APITestCase):
         self.assertEqual(User.objects.get().email, self.user_data["email"])
 
         # try to create the same user again
-        response = self._user_data_post(self.user_data, self.REGISTER_URL)
+        response = self.self._register_user(self.user_data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), expected_obj_count)
 
@@ -52,45 +52,45 @@ class UserAccountTest(APITestCase):
         expected_users_count = User.objects.count()
         user_data = self.user_data
         user_data["password"] = "123"
-        response = self._user_data_post(user_data, self.REGISTER_URL)
+        response = self._register_user(self.user_data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), expected_users_count)
 
     def test_bad_email_register(self):
         expected_users_count = User.objects.count()
-        response = self._user_data_post(self.bad_email_data, self.REGISTER_URL)
+        response = self._register_user(self.user_data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), expected_users_count)
 
     def test_login(self):
-        self._user_data_post(self.user_data, self.REGISTER_URL)
+        self._register_user(self.user_data)
         # set user as active
         user = User.objects.first()
         user.is_active = True
-        user.save()
-        response = self._user_data_post(self.user_data, self.OBTAIN_TOKEN_URL)
+        user.save(update_fields=["is_active"])
+        response = self.client.post(self.OBTAIN_TOKEN_URL, self.user_data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(
             "access" in response.data and "refresh" in response.data)
 
     def test_login_inactive(self):
-        self._user_data_post(self.user_data, self.REGISTER_URL)
-        response = self._user_data_post(self.user_data, self.OBTAIN_TOKEN_URL)
+        self._register_user(self.user_data)
+        response = self.client.post(self.OBTAIN_TOKEN_URL, self.user_data, format="json")
 
         # user should be inactive after registration
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_user_details(self):
-        self._user_data_post(self.user_data, self.REGISTER_URL)
+        self._register_user(self.user_data)
         # set user as active
         user = User.objects.first()
         user.is_active = True
         user.save()
 
-        response = self._user_data_post(self.user_data, self.OBTAIN_TOKEN_URL)
+        response = self.client.post(self.OBTAIN_TOKEN_URL, self.user_data, format="json")
         access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
         response = self.client.get(self.USER_DETAILS_URL)
