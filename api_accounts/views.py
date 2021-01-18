@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from api_accounts.models import User
 from api_accounts.serializers import UserRegistrationSerializer, UserSerializer, ActivateAccountSerializer
-from api_accounts.utils import send_verification_email
+from api_accounts.tasks import send_verification_email
 
 
 class UserRegistrationView(CreateAPIView):
