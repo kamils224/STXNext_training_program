@@ -17,8 +17,10 @@ services:
     image: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - ./.env.dev
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
   redis:
     image: redis:alpine
     command: redis-server
