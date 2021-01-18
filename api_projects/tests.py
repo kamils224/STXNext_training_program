@@ -153,9 +153,9 @@ class UserProjectsTest(APITestCase):
 
         new_name = "new name"
         self._login_user(user_1)
-        response_ok = self.client.put(url, {"name":new_name})
+        response_ok = self.client.put(url, {"name": new_name})
         self._login_user(user_2)
-        response_bad = self.client.put(url, {"name":new_name})
+        response_bad = self.client.put(url, {"name": new_name})
 
         self.assertEqual(response_ok.status_code,
                          status.HTTP_200_OK)
