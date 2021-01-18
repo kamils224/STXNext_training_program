@@ -6,15 +6,6 @@ from api_projects.models import Project
 from api_projects.serializers import ProjectSerializer
 from api_projects.permissions import IsOwnerOrMemberReadOnly
 
-"""
-"Endpoints for:
-
-- creating & editing a new project
-- listing all projects available to current user
-- assigning user to a project
-Project should consist of name, owner and creation date"
-"""
-
 
 class ProjectViewSet(ModelViewSet):
     queryset = Project.objects.all()
@@ -24,3 +15,6 @@ class ProjectViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return Project.objects.filter(Q(members=user) | Q(owner=user)).distinct()
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
