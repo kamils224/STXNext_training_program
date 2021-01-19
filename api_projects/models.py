@@ -4,8 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from api_projects.tasks import user_created
-
+from api_projects.tasks import send_issue_notification, NotificationData
 
 User = get_user_model()
 
@@ -22,6 +21,12 @@ class Project(models.Model):
 
 
 class Issue(models.Model):
+
+    def __init__(self, *args, **kwargs):
+        super(Issue, self).__init__(*args, **kwargs)
+        # save these values before update
+        self.__original_due_date = self.due_date
+        self.__original_assigne = self.assigne
 
     class Status(models.TextChoices):
         TODO = "todo"
@@ -45,7 +50,22 @@ class Issue(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super(Issue, self).save(*args, **kwargs)
 
-@receiver(post_save, sender=User, dispatch_uid="create_info")
-def user_created_info(sender, instance, created, **kwargs):
-    user_created.delay()
+        due_date = self.due_date
+        assigne = self.assigne
+        previous_assigne = self.__original_assigne
+        # Item is created or updated
+        if is_new or self.__original_due_date != due_date:
+            subject = "Your task is not completed!"
+            message = f"The time for the task {self.title} is over :("
+            print(message)
+        if is_new or previous_assigne != assigne:
+            if assigne is not None:
+                send_issue_notification.delay(
+                    assigne.email, "New assignment", f"You are assigned to the task {self.title}")
+            if previous_assigne is not None:
+                send_issue_notification.delay(
+                    previous_assigne.email, "Assigment is removed", f"You were removed from task {self.title}")

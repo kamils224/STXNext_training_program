@@ -26,7 +26,7 @@ class UserRegistrationView(CreateAPIView):
         user = serializer.save()
         # The sender is set in DEFAULT_FROM_EMAIL in settings.py
         # If sending fails, Server Error (500) is returned in response
-        send_verification_email(
+        send_verification_email.delay(
             user,
             request,
             subject="Training course",

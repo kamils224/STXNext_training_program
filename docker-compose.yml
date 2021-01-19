@@ -43,7 +43,17 @@ services:
       - app
     env_file:
       - ./.env.dev
+  celery-beat:
+    build: .
+    command: celery -A stx_training_program beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    user: nobody
+    links:
+      - redis
+    volumes:
+      - .:/backend
+    depends_on:
+      - app
+    env_file:
+      - ./.env.dev
 volumes:
   postgres_data:
-
-    #celery --app=stx_training_program worker -l INFO
