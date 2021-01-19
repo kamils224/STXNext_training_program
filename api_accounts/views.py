@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from smtplib import SMTPException
 
 from api_accounts.models import User
 from api_accounts.serializers import UserRegistrationSerializer, UserSerializer, ActivateAccountSerializer
@@ -24,14 +25,16 @@ class UserRegistrationView(CreateAPIView):
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        # The sender is set in DEFAULT_FROM_EMAIL in settings.py
-        # If sending fails, Server Error (500) is returned in response
-        send_verification_email(
-            user,
-            request,
-            subject="Training course",
-            message="Hello! Activate your account here:\n"
-        )
+        try:
+            send_verification_email(
+                user,
+                request,
+                subject="Training course",
+                message="Hello! Activate your account here:\n"
+            )
+        except (SMTPException):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
         return Response({"message": f"Registration successful, check your email: {user}"},
                         status=status.HTTP_201_CREATED)
 
