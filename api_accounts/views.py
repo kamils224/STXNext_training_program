@@ -59,7 +59,7 @@ class ActivateAccountView(RetrieveAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
         user.is_active = True
-        user.save()
+        user.save(update_fields=["is_active"])
 
         return Response({"message": "Email successfully verified!"},
                         status=status.HTTP_200_OK)
