@@ -5,8 +5,7 @@ from django.db.models import F, Q
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from celery.worker.control import revoke
-from celery.states import REVOKED
+from stx_training_program.celery import app
 
 from api_projects.tasks import send_issue_notification, notify_issue_deadline
 
@@ -81,7 +80,8 @@ class Issue(models.Model):
             current_task, _ = DateUpdateTask.objects.get_or_create(issue=self)
             if current_task.task_id is not None:
                 # remove previous task due to date change
-                revoke(REVOKED, task_id=current_task.task_id, terminate=True)
+                app.control.revoke(
+                    task_id=current_task.task_id, terminate=True)
 
             subject = "Your task is not completed!"
             message = f"The time for the task {self.title} is over :("
