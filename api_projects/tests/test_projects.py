@@ -11,7 +11,7 @@ User = get_user_model()
 # NOTE: It's better option to create some test fixtures in future
 
 
-class UserProjectsTest(APITestCase):
+class ProjectsTest(APITestCase):
 
     OBTAIN_TOKEN_URL = reverse_lazy("api_accounts:token_obtain_pair")
 
