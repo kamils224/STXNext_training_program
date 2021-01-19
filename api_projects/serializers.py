@@ -6,7 +6,7 @@ from api_projects.models import Project
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.email')
+    owner = serializers.ReadOnlyField(source='owner.pk')
 
     class Meta:
         model = Project
