@@ -54,29 +54,29 @@ class Issue(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        is_new = self.pk is None
         super(Issue, self).save(*args, **kwargs)
 
-        previous_assigne = self.__original_assigne
-        assigne = self.assigne
-        if previous_assigne != assigne:
-            self._perform_assigne_notification(previous_assigne, assigne)
+        if self.__original_assigne != self.assigne:
+            self._perform_assigne_notification()
 
-        if self.__original_due_date != self.due_date or is_new:
+        if self.__original_due_date != self.due_date:
             self._perform_deadline_notification()
 
-    def _perform_assigne_notification(self, previous_assigne: User, assigne: User) -> str:
-        if assigne is not None:
+    def _perform_assigne_notification(self) -> str:
+        if self.assigne is not None:
             send_issue_notification.delay(
-                assigne.email, "New assignment", f"You are assigned to the task {self.title}")
+                self.assigne.email,
+                "New assignment",
+                f"You are assigned to the task {self.title}")
 
-        if previous_assigne is not None:
+        if self.__original_due_date is not None:
             send_issue_notification.delay(
-                previous_assigne.email, "Assigment is removed", f"You were removed from task {self.title}")
+                self.assigne.email,
+                "Assigment is removed",
+                f"You were removed from task {self.title}")
 
     def _perform_deadline_notification(self):
-        assigne = self.assigne
-        if assigne:
+        if self.assigne:
             current_task, _ = DateUpdateTask.objects.get_or_create(issue=self)
             if current_task.task_id is not None:
                 # remove previous task due to date change
@@ -87,7 +87,7 @@ class Issue(models.Model):
             message = f"The time for the task {self.title} is over :("
             current_task.task_id = notify_issue_deadline.s(
                 self.pk,
-                assigne.email,
+                self.assigne.email,
                 subject,
                 message
             ).apply_async(eta=self.due_date)
