@@ -11,15 +11,6 @@ from api_projects.models import Project, Issue
 from api_projects.serializers import ProjectSerializer, IssueSerializer
 from api_projects.permissions import IsOwner, MemberReadOnly, IsProjectMember, CanViewIssues
 
-"""
-"Endpoints for:
-
-- creating & editing a new project
-- listing all projects available to current user
-- assigning user to a project
-Project should consist of name, owner and creation date"
-"""
-
 
 class ProjectViewSet(ModelViewSet):
     queryset = Project.objects.all()
@@ -30,6 +21,9 @@ class ProjectViewSet(ModelViewSet):
         user = self.request.user
         query = Q(owner=user) | Q(members=user)
         return Project.objects.filter(query).distinct()
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
     @action(methods=["get"], detail=True, url_path="issues", url_name="issues",
             permission_classes=[CanViewIssues])
@@ -49,5 +43,9 @@ class IssueViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        query = Q(project__in=user.projects.all()) | Q(project__in=user.own_projects.all())
+        query = Q(project__in=user.projects.all()) | Q(
+            project__in=user.own_projects.all())
         return Issue.objects.filter(query)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
