@@ -22,3 +22,4 @@ def notify_issue_deadline(pk: int, email: str, subject: str, message: str) -> No
             email,
             "Issue deadline",
             f"The {issue.title} is not finished after deadline!")
+        issue.issue_task.delete()

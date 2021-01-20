@@ -28,8 +28,8 @@ class Issue(models.Model):
     def __init__(self, *args, **kwargs):
         super(Issue, self).__init__(*args, **kwargs)
         # save these values before update
-        self.__original_due_date = self.due_date
-        self.__original_assigne = self.assigne
+        self._original_due_date = self.due_date
+        self._original_assigne = self.assigne
 
     class Status(models.TextChoices):
         TODO = "todo"
@@ -56,10 +56,10 @@ class Issue(models.Model):
     def save(self, *args, **kwargs):
         super(Issue, self).save(*args, **kwargs)
 
-        if self.__original_assigne != self.assigne:
+        if self._original_assigne != self.assigne:
             self._perform_assigne_notification()
 
-        if self.__original_due_date != self.due_date:
+        if self._original_due_date != self.due_date:
             self._perform_deadline_notification()
 
     def _perform_assigne_notification(self) -> str:
@@ -69,7 +69,7 @@ class Issue(models.Model):
                 "New assignment",
                 f"You are assigned to the task {self.title}")
 
-        if self.__original_due_date is not None:
+        if self._original_assigne is not None:
             send_issue_notification.delay(
                 self.assigne.email,
                 "Assigment is removed",
@@ -97,5 +97,5 @@ class Issue(models.Model):
 # Can be extended / changed as more tasks are needed
 class DateUpdateTask(models.Model):
     issue = models.OneToOneField(
-        Issue, on_delete=models.CASCADE, primary_key=True)
+        Issue, on_delete=models.CASCADE, primary_key=True, related_name="issue_task")
     task_id = models.CharField(max_length=50, unique=True, blank=True)
