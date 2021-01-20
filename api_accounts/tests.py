@@ -71,16 +71,17 @@ class UserAccountTest(APITestCase):
         user.is_active = True
         user.save(update_fields=["is_active"])
         response = self.client.post(
-            self.OBTAIN_TOKEN_URL, self.user_data, format="json")
+            self.OBTAIN_TOKEN_URL, self.user_data, format="json"
+        )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(
-            "access" in response.data and "refresh" in response.data)
+        self.assertTrue("access" in response.data and "refresh" in response.data)
 
     def test_login_inactive(self):
         self._register_user(self.user_data)
         response = self.client.post(
-            self.OBTAIN_TOKEN_URL, self.user_data, format="json")
+            self.OBTAIN_TOKEN_URL, self.user_data, format="json"
+        )
 
         # user should be inactive after registration
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -93,7 +94,8 @@ class UserAccountTest(APITestCase):
         user.save()
 
         response = self.client.post(
-            self.OBTAIN_TOKEN_URL, self.user_data, format="json")
+            self.OBTAIN_TOKEN_URL, self.user_data, format="json"
+        )
         access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
         response = self.client.get(self.USER_DETAILS_URL)
@@ -107,7 +109,8 @@ class UserAccountTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_account_activate_fail(self):
-        response = self.client.get(self.ACCOUNT_ACTIVATE_URL, {
-                                   "uid": "1", "token": "anytoken"})
+        response = self.client.get(
+            self.ACCOUNT_ACTIVATE_URL, {"uid": "1", "token": "anytoken"}
+        )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

@@ -34,11 +34,12 @@ class ProjectsTest(APITestCase):
             {"email": "member_owner2@example.com", "password": "password222"},
             {"email": "member_owner3@example.com", "password": "password333"},
         ]
-        self.users = [User.objects.create_user(
-            **user) for user in self.owners + self.no_project_users]
+        self.users = [
+            User.objects.create_user(**user)
+            for user in self.owners + self.no_project_users
+        ]
 
-        members = [User.objects.create_user(
-            **member) for member in self.members]
+        members = [User.objects.create_user(**member) for member in self.members]
 
         User.objects.all().update(is_active=True)
 
@@ -50,7 +51,7 @@ class ProjectsTest(APITestCase):
             name="Project1 without members", owner=self.users[0])
         Project.objects.create(name="Project2 empty", owner=self.users[1])
 
-        date = datetime(2022, 10, 19, hour=12, minute=30)
+        due_date = datetime(2022, 10, 19, hour=12, minute=30)
         Issue.objects.create(
             owner=self.users[0], title="Issue1", description="Description",
             due_date=date, project=project_1)
@@ -70,14 +71,12 @@ class ProjectsTest(APITestCase):
         url = reverse(self.PROJECT_LIST)
         # anonymous user
         response = self.client.get(url)
-        self.assertEqual(response.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         # logged in as owner
         user = self.owners[0]
         self._login_user(user)
-        expected_count = Project.objects.filter(
-            owner__email=user["email"]).count()
+        expected_count = Project.objects.filter(owner__email=user["email"]).count()
 
         response = self.client.get(url)
         self.assertEqual(len(response.data), expected_count)
@@ -85,8 +84,7 @@ class ProjectsTest(APITestCase):
         # logged in as member
         user = self.members[0]
         self._login_user(user)
-        expected_count = Project.objects.filter(
-            members__email=user["email"]).count()
+        expected_count = Project.objects.filter(members__email=user["email"]).count()
 
         response = self.client.get(url)
         self.assertEqual(len(response.data), expected_count)
@@ -111,10 +109,8 @@ class ProjectsTest(APITestCase):
         self._login_user(user_2)
         response_bad = self.client.get(url)
 
-        self.assertEqual(response_ok.status_code,
-                         status.HTTP_200_OK)
-        self.assertEqual(response_bad.status_code,
-                         status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response_ok.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_bad.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_project(self):
         url = reverse(self.PROJECT_LIST)
@@ -123,14 +119,13 @@ class ProjectsTest(APITestCase):
 
         user = self.no_project_users[0]
         self._login_user(user)
-        expected_count = Project.objects.filter(
-            owner__email=user["email"]).count() + 1
+        expected_count = Project.objects.filter(owner__email=user["email"]).count() + 1
         response_ok = self.client.post(url, new_project)
         current_projects_count = Project.objects.filter(
-            owner__email=user["email"]).count()
+            owner__email=user["email"]
+        ).count()
 
-        self.assertEqual(response_bad.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response_bad.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response_ok.status_code, status.HTTP_201_CREATED)
         self.assertEqual(current_projects_count, expected_count)
 
@@ -147,11 +142,9 @@ class ProjectsTest(APITestCase):
         self._login_user(user_2)
         response_bad = self.client.put(url, {"name": new_name})
 
-        self.assertEqual(response_ok.status_code,
-                         status.HTTP_200_OK)
+        self.assertEqual(response_ok.status_code, status.HTTP_200_OK)
         self.assertEqual(response_ok.data["name"], new_name)
-        self.assertEqual(response_bad.status_code,
-                         status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response_bad.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_project(self):
         user = self.owners[0]
@@ -167,8 +160,7 @@ class ProjectsTest(APITestCase):
         projects_count_delete = Project.objects.count()
 
         self.assertEqual(projects_count_non_auth_delete, projects_init_count)
-        self.assertEqual(response_bad.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response_bad.status_code, status.HTTP_401_UNAUTHORIZED)
 
         self.assertEqual(projects_count_delete, projects_init_count - 1)
         self.assertEqual(response_ok.status_code,
