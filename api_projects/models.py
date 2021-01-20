@@ -94,6 +94,7 @@ class Issue(models.Model):
             current_task.save()
 
 
+# Can be extended / changed as more tasks are needed
 class DateUpdateTask(models.Model):
     issue = models.OneToOneField(
         Issue, on_delete=models.CASCADE, primary_key=True)
