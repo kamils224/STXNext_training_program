@@ -14,7 +14,8 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 class IssueSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source="owner.pk")
+    owner = serializers.ReadOnlyField(source="owner.email")
+    assigne = serializers.ReadOnlyField(source="assigne.email")
     attachments = serializers.SerializerMethodField()
 
     class Meta:
@@ -23,8 +24,14 @@ class IssueSerializer(serializers.ModelSerializer):
 
     def get_attachments(self, issue):
         hostname = self.context["request"].META["HTTP_HOST"]
-        return ({"id": file.pk, "name": str(file), "url": f"{hostname}{file.file_attachment.url}"}
-                for file in issue.files.all())
+        return (
+            {
+                "id": file.pk,
+                "name": str(file),
+                "url": f"{hostname}{file.file_attachment.url}",
+            }
+            for file in issue.files.all()
+        )
 
 
 class IssueAttachmentSerializer(serializers.ModelSerializer):

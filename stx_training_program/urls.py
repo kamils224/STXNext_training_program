@@ -23,7 +23,11 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api-accounts/", include("api_accounts.urls")),
     path("api-projects/", include("api_projects.urls")),
-    re_path(r'^media/(?P<path>.*)$', serve, {
-            'document_root': settings.MEDIA_ROOT,
-            }),
+    re_path(
+        r"^media/(?P<path>.*)$",
+        serve,
+        {
+            "document_root": settings.MEDIA_ROOT,
+        },
+    ),
 ]

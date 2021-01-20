@@ -3,7 +3,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.generics import RetrieveDestroyAPIView
+from rest_framework.generics import DestroyAPIView, CreateAPIView
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
@@ -48,8 +49,9 @@ class ProjectViewSet(ModelViewSet):
         """
 
         project = get_object_or_404(Project, pk=pk)
-        serializer = IssueSerializer(project.issues.all(), many=True, context={
-                                     "request": self.request})
+        serializer = IssueSerializer(
+            project.issues.all(), many=True, context={"request": self.request}
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -68,12 +70,13 @@ class IssueViewSet(ModelViewSet):
         serializer.save(owner=self.request.user)
 
 
-class IssueAttachment(RetrieveDestroyAPIView):
+class IssueAttachmentDelete(DestroyAPIView):
     queryset = IssueAttachment.objects.all()
     serializer_class = IssueAttachmentSerializer
+    permission_classes = [IsProjectMember | IsOwner]
 
-    def get(self, request, pk=None):
-        print("wtf")
-        print(pk)
-        #attachment = get_object_or_404(self.queryset, pk=pk)
-        return Response(status=status.HTTP_200_OK)
+
+class IssueAttachmentCreate(CreateAPIView):
+    queryset = IssueAttachment.objects.all()
+    serializer_class = IssueAttachmentSerializer
+    permission_classes = [IsProjectMember | IsOwner]
