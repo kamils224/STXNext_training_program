@@ -44,20 +44,28 @@ class ProjectsTest(APITestCase):
         User.objects.all().update(is_active=True)
 
         project_1 = Project.objects.create(
-            name="Project1 with members", owner=self.users[0])
+            name="Project1 with members", owner=self.users[0]
+        )
         project_1.members.add(*members)
 
-        Project.objects.create(
-            name="Project1 without members", owner=self.users[0])
+        Project.objects.create(name="Project1 without members", owner=self.users[0])
         Project.objects.create(name="Project2 empty", owner=self.users[1])
 
         due_date = datetime(2022, 10, 19, hour=12, minute=30)
         Issue.objects.create(
-            owner=self.users[0], title="Issue1", description="Description",
-            due_date=date, project=project_1)
+            owner=self.users[0],
+            title="Issue1",
+            description="Description",
+            due_date=date,
+            project=project_1,
+        )
         Issue.objects.create(
-            owner=self.users[1], title="Issue2", description="Description",
-            due_date=date, project=project_2)
+            owner=self.users[1],
+            title="Issue2",
+            description="Description",
+            due_date=date,
+            project=project_2,
+        )
 
     def setUp(self):
         self._init_db()
@@ -163,8 +171,7 @@ class ProjectsTest(APITestCase):
         self.assertEqual(response_bad.status_code, status.HTTP_401_UNAUTHORIZED)
 
         self.assertEqual(projects_count_delete, projects_init_count - 1)
-        self.assertEqual(response_ok.status_code,
-                         status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response_ok.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_get_issue(self):
         pass

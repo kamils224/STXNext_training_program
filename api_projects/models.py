@@ -19,7 +19,6 @@ class Project(models.Model):
 
 
 class Issue(models.Model):
-
     class Status(models.TextChoices):
         TODO = "todo"
         IN_PROGRESS = "in progress"
@@ -31,13 +30,21 @@ class Issue(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     due_date = models.DateTimeField()
     status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.TODO)
+        max_length=20, choices=Status.choices, default=Status.TODO
+    )
     owner = models.ForeignKey(
-        User, related_name="created_issues", on_delete=models.CASCADE)
+        User, related_name="created_issues", on_delete=models.CASCADE
+    )
     assigne = models.ForeignKey(
-        User, related_name="own_issues", on_delete=models.SET_NULL, blank=True, null=True)
+        User,
+        related_name="own_issues",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
     project = models.ForeignKey(
-        Project, related_name="issues", on_delete=models.CASCADE)
+        Project, related_name="issues", on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return self.title

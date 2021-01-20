@@ -18,7 +18,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 class IssueSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.pk')
+    owner = serializers.ReadOnlyField(source="owner.pk")
 
     class Meta:
         model = Issue
