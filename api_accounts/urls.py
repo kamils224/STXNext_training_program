@@ -5,7 +5,11 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from api_accounts.views import UserRegistrationView, UserDetailsView, ActivateAccountView
+from api_accounts.views import (
+    UserRegistrationView,
+    UserDetailsView,
+    ActivateAccountView,
+)
 
 app_name = "api_accounts"
 
