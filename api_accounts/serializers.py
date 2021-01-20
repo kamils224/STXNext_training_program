@@ -45,9 +45,6 @@ class ActivateAccountSerializer(serializers.Serializer):
             uid = force_text(urlsafe_base64_decode(uid))
             user = User.objects.get(pk=uid)
         except (ObjectDoesNotExist, ValueError):
-            user = None
-
-        if user is None:
             raise serializers.ValidationError("Given user does not exist")
 
         activation_token = VerificationTokenGenerator()
