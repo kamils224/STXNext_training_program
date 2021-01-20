@@ -21,17 +21,20 @@ class VerificationTokenGenerator(PasswordResetTokenGenerator):
         return str(user.pk) + str(timestamp) + str(user.is_active)
 
 
-def send_verification_email(user: User, request: Request,
-                            subject: str = "Verify your email", message: str = "",
-                            sender: Optional[str] = None) -> None:
+def send_verification_email(
+    user: User,
+    request: Request,
+    subject: str = "Verify your email",
+    message: str = "",
+    sender: Optional[str] = None,
+) -> None:
     token_generator = VerificationTokenGenerator()
     token = token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
 
     message += _create_activation_url(uid, token, request)
     # The sender is set in DEFAULT_FROM_EMAIL in settings.py
-    send_mail(subject, message, None, recipient_list=[
-              user.email], fail_silently=False)
+    send_mail(subject, message, None, recipient_list=[user.email], fail_silently=False)
 
 
 def _create_activation_url(uid: str, token: str, request: Request) -> str:
