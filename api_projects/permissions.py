@@ -1,5 +1,7 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
+from api_projects.models import Project, Issue
+
 
 class IsOwner(BasePermission):
     """
@@ -8,7 +10,11 @@ class IsOwner(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Instance must have an attribute named `owner`.
-        return obj.owner == request.user
+        user = request.user
+        if isinstance(obj, Project):
+            return obj.owner == user
+        if isinstance(obj, Issue):
+            return obj.owner == user or obj.project.owner == user
 
 
 class MemberReadOnly(BasePermission):
@@ -41,4 +47,7 @@ class IsProjectMember(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Instance must have an attribute named `project`.
-        return obj.project in request.user.projects.all()
+        if isinstance(obj, Issue):
+            return obj.project in request.user.projects.all()
+        if isinstance(obj, Project):
+            return obj in request.user.projects.all()
