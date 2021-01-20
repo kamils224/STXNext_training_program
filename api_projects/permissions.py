@@ -43,7 +43,7 @@ class CanViewIssues(BasePermission):
 
 class IsProjectMember(BasePermission):
     """
-    Checks if current user is member or owner of the project.
+    Checks if current user is member of the project.
     """
 
     def has_object_permission(self, request, view, obj):
