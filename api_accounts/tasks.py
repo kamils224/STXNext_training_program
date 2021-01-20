@@ -12,8 +12,9 @@ User = get_user_model()
 
 
 @shared_task
-def send_verification_email(user: User, request: Request,
-                            subject: str = "Verify your email", message: str = "") -> None:
+def send_verification_email(
+    user: User, request: Request, subject: str = "Verify your email", message: str = ""
+) -> None:
     token_generator = VerificationTokenGenerator()
     token = token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -21,5 +22,4 @@ def send_verification_email(user: User, request: Request,
     message += create_activation_url(uid, token, request)
 
     # The sender is set in DEFAULT_FROM_EMAIL in settings.py
-    send_mail(subject, message, None, recipient_list=[
-              user.email], fail_silently=False)
+    send_mail(subject, message, None, recipient_list=[user.email], fail_silently=False)

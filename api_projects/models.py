@@ -16,7 +16,8 @@ User = get_user_model()
 class Project(models.Model):
     name = models.CharField(max_length=100)
     owner = models.ForeignKey(
-        User, related_name="own_projects", on_delete=models.CASCADE)
+        User, related_name="own_projects", on_delete=models.CASCADE
+    )
     creation_date = models.DateTimeField(auto_now_add=True)
     members = models.ManyToManyField(User, related_name="projects", blank=True)
 
@@ -25,7 +26,6 @@ class Project(models.Model):
 
 
 class Issue(models.Model):
-
     def __init__(self, *args, **kwargs):
         super(Issue, self).__init__(*args, **kwargs)
         # save these values before update
@@ -43,13 +43,21 @@ class Issue(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     due_date = models.DateTimeField()
     status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.TODO)
+        max_length=20, choices=Status.choices, default=Status.TODO
+    )
     owner = models.ForeignKey(
-        User, related_name="created_issues", on_delete=models.CASCADE)
+        User, related_name="created_issues", on_delete=models.CASCADE
+    )
     assigne = models.ForeignKey(
-        User, related_name="own_issues", on_delete=models.SET_NULL, blank=True, null=True)
+        User,
+        related_name="own_issues",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
     project = models.ForeignKey(
-        Project, related_name="issues", on_delete=models.CASCADE)
+        Project, related_name="issues", on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return self.title
@@ -68,43 +76,39 @@ class Issue(models.Model):
             send_issue_notification.delay(
                 self.assigne.email,
                 "New assignment",
-                f"You are assigned to the task {self.title}")
+                f"You are assigned to the task {self.title}",
+            )
 
         if self.__original_due_date is not None:
             send_issue_notification.delay(
                 self.assigne.email,
                 "Assigment is removed",
-                f"You were removed from task {self.title}")
+                f"You were removed from task {self.title}",
+            )
 
     def _perform_deadline_notification(self):
         if self.assigne:
             current_task, _ = DateUpdateTask.objects.get_or_create(issue=self)
             if current_task.task_id is not None:
                 # remove previous task due to date change
-                app.control.revoke(
-                    task_id=current_task.task_id, terminate=True)
+                app.control.revoke(task_id=current_task.task_id, terminate=True)
 
             subject = "Your task is not completed!"
             message = f"The time for the task {self.title} is over :("
             current_task.task_id = notify_issue_deadline.s(
-                self.pk,
-                self.assigne.email,
-                subject,
-                message
+                self.pk, self.assigne.email, subject, message
             ).apply_async(eta=self.due_date)
             current_task.save()
 
 
 class DateUpdateTask(models.Model):
-    issue = models.OneToOneField(
-        Issue, on_delete=models.CASCADE, primary_key=True)
+    issue = models.OneToOneField(Issue, on_delete=models.CASCADE, primary_key=True)
     task_id = models.CharField(max_length=50, unique=True, blank=True)
 
 
 class IssueAttachment(models.Model):
     file_attachment = models.FileField(upload_to="attachments/")
-    issue = models.ForeignKey(
-        Issue, on_delete=models.CASCADE, related_name="files")
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name="files")
 
     def __str__(self):
         return os.path.basename(self.file_attachment.name)

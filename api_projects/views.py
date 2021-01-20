@@ -8,8 +8,17 @@ from rest_framework.decorators import action
 
 
 from api_projects.models import Project, Issue, IssueAttachment
-from api_projects.serializers import ProjectSerializer, IssueSerializer, IssueAttachmentSerializer
-from api_projects.permissions import IsOwner, MemberReadOnly, IsProjectMember, CanViewIssues
+from api_projects.serializers import (
+    ProjectSerializer,
+    IssueSerializer,
+    IssueAttachmentSerializer,
+)
+from api_projects.permissions import (
+    IsOwner,
+    MemberReadOnly,
+    IsProjectMember,
+    CanViewIssues,
+)
 
 
 class ProjectViewSet(ModelViewSet):
@@ -25,8 +34,13 @@ class ProjectViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    @action(methods=["get"], detail=True, url_path="issues", url_name="issues",
-            permission_classes=[CanViewIssues])
+    @action(
+        methods=["get"],
+        detail=True,
+        url_path="issues",
+        url_name="issues",
+        permission_classes=[CanViewIssues],
+    )
     def get_issues(self, request, pk=None):
         """
         Additional endpoint for related issues. Available from route: `<project_pk>/issues`.
@@ -44,7 +58,8 @@ class IssueViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         query = Q(project__in=user.projects.all()) | Q(
-            project__in=user.own_projects.all())
+            project__in=user.own_projects.all()
+        )
         return Issue.objects.filter(query)
 
     def perform_create(self, serializer):

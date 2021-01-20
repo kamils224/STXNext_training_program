@@ -6,7 +6,11 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from api_accounts.models import User
-from api_accounts.serializers import UserRegistrationSerializer, UserSerializer, ActivateAccountSerializer
+from api_accounts.serializers import (
+    UserRegistrationSerializer,
+    UserSerializer,
+    ActivateAccountSerializer,
+)
 from api_accounts.tasks import send_verification_email
 
 
@@ -30,15 +34,17 @@ class UserRegistrationView(CreateAPIView):
             user,
             request,
             subject="Training course",
-            message="Hello! Activate your account here:\n"
+            message="Hello! Activate your account here:\n",
         )
-        return Response({"message": f"Registration successful, check your email: {user}"},
-                        status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": f"Registration successful, check your email: {user}"},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class UserDetailsView(RetrieveAPIView):
     """
-    An endpoint for user details. 
+    An endpoint for user details.
     Returns data based on the currently logged user, without providing his id/pk in URL.
     """
 
@@ -61,5 +67,6 @@ class ActivateAccountView(RetrieveAPIView):
         user.is_active = True
         user.save(update_fields=["is_active"])
 
-        return Response({"message": "Email successfully verified!"},
-                        status=status.HTTP_200_OK)
+        return Response(
+            {"message": "Email successfully verified!"}, status=status.HTTP_200_OK
+        )

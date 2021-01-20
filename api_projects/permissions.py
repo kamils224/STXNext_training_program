@@ -38,6 +38,7 @@ class IsProjectMember(BasePermission):
     """
     Checks if current user is member or owner of the project.
     """
+
     def has_object_permission(self, request, view, obj):
         # Instance must have an attribute named `project`.
         return obj.project in request.user.projects.all()

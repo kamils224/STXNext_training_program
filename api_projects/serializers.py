@@ -6,7 +6,7 @@ from api_projects.models import Project, Issue, IssueAttachment
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.pk')
+    owner = serializers.ReadOnlyField(source="owner.pk")
 
     class Meta:
         model = Project
@@ -14,7 +14,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 class IssueSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.pk')
+    owner = serializers.ReadOnlyField(source="owner.pk")
     attachments = serializers.SerializerMethodField()
 
     class Meta:
