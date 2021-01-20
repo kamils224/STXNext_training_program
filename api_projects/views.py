@@ -2,13 +2,13 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
 
-from api_projects.models import Project, Issue
-from api_projects.serializers import ProjectSerializer, IssueSerializer
+from api_projects.models import Project, Issue, IssueAttachment
+from api_projects.serializers import ProjectSerializer, IssueSerializer, IssueAttachmentSerializer
 from api_projects.permissions import IsOwner, MemberReadOnly, IsProjectMember, CanViewIssues
 
 
@@ -49,3 +49,8 @@ class IssueViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+class IssueAttachmentViewSet(ReadOnlyModelViewSet):
+    queryset = IssueAttachment.objects.all()
+    serializer_class = IssueAttachmentSerializer

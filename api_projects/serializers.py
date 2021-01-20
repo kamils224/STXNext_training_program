@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 
-from api_projects.models import Project, Issue
+from api_projects.models import Project, Issue, IssueAttachment
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -15,7 +15,17 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class IssueSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.pk')
+    attachments = serializers.SerializerMethodField()
 
     class Meta:
         model = Issue
+        fields = "__all__"
+
+    def get_attachments(self, issue):
+        return ({"id": file.pk, "name": str(file)} for file in issue.files.all())
+
+
+class IssueAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IssueAttachment
         fields = "__all__"

@@ -1,9 +1,10 @@
-import uuid
+import os
 
 from django.db import models
+from django.db.models.signals import post_delete
 from django.db.models import F, Q
 from django.contrib.auth import get_user_model
-from django.db.models.signals import post_save
+from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from stx_training_program.celery import app
 
@@ -101,4 +102,14 @@ class DateUpdateTask(models.Model):
 
 
 class IssueAttachment(models.Model):
-    file_name = models 
+    file_attachment = models.FileField(upload_to="attachments/")
+    issue = models.ForeignKey(
+        Issue, on_delete=models.CASCADE, related_name="files")
+
+    def __str__(self):
+        return os.path.basename(self.file_attachment.name)
+
+
+@receiver(post_delete, sender=IssueAttachment)
+def issue_attachment_delete(sender, instance, **kwargs):
+    instance.file_attachment.delete(save=False)

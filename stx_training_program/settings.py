@@ -167,7 +167,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = "/static/"
-
+parent_dir = os.path.abspath(os.path.dirname(__file__) + '/..')
+MEDIA_ROOT = os.path.join(parent_dir, 'media/')
+MEDIA_URL = '/media/'
 
 # Mailing service
 EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
