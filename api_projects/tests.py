@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Dict
 
 from django.contrib.auth import get_user_model
@@ -50,22 +49,6 @@ class ProjectsTest(APITestCase):
 
         Project.objects.create(name="Project1 without members", owner=self.users[0])
         Project.objects.create(name="Project2 empty", owner=self.users[1])
-
-        due_date = datetime(2022, 10, 19, hour=12, minute=30)
-        Issue.objects.create(
-            owner=self.users[0],
-            title="Issue1",
-            description="Description",
-            due_date=date,
-            project=project_1,
-        )
-        Issue.objects.create(
-            owner=self.users[1],
-            title="Issue2",
-            description="Description",
-            due_date=date,
-            project=project_2,
-        )
 
     def setUp(self):
         self._init_db()
