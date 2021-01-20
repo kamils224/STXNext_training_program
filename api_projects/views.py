@@ -1,8 +1,9 @@
 from django.db.models import Q
-from django.shortcuts import get_object_or_404, get_list_or_404
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.generics import RetrieveDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
@@ -47,7 +48,8 @@ class ProjectViewSet(ModelViewSet):
         """
 
         project = get_object_or_404(Project, pk=pk)
-        serializer = IssueSerializer(project.issues.all(), many=True)
+        serializer = IssueSerializer(project.issues.all(), many=True, context={
+                                     "request": self.request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -66,6 +68,12 @@ class IssueViewSet(ModelViewSet):
         serializer.save(owner=self.request.user)
 
 
-class IssueAttachmentViewSet(ReadOnlyModelViewSet):
+class IssueAttachment(RetrieveDestroyAPIView):
     queryset = IssueAttachment.objects.all()
     serializer_class = IssueAttachmentSerializer
+
+    def get(self, request, pk=None):
+        print("wtf")
+        print(pk)
+        #attachment = get_object_or_404(self.queryset, pk=pk)
+        return Response(status=status.HTTP_200_OK)

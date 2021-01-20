@@ -22,7 +22,9 @@ class IssueSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_attachments(self, issue):
-        return ({"id": file.pk, "name": str(file)} for file in issue.files.all())
+        hostname = self.context["request"].META["HTTP_HOST"]
+        return ({"id": file.pk, "name": str(file), "url": f"{hostname}{file.file_attachment.url}"}
+                for file in issue.files.all())
 
 
 class IssueAttachmentSerializer(serializers.ModelSerializer):
