@@ -80,3 +80,4 @@ class IssueAttachmentCreate(CreateAPIView):
     queryset = IssueAttachment.objects.all()
     serializer_class = IssueAttachmentSerializer
     permission_classes = [IsProjectMember | IsOwner]
+    parser_classes = [MultiPartParser]
