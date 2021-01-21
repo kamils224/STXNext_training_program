@@ -89,8 +89,7 @@ class Issue(models.Model):
             current_task, _ = DateUpdateTask.objects.get_or_create(issue=self)
             if current_task.task_id is not None:
                 # remove previous task due to date change
-                app.control.revoke(
-                    task_id=current_task.task_id, terminate=True)
+                app.control.revoke(task_id=current_task.task_id, terminate=True)
 
             subject = "Your task is not completed!"
             message = f"The time for the task {self.title} is over :("
@@ -110,11 +109,11 @@ class DateUpdateTask(models.Model):
 
 class IssueAttachment(models.Model):
     file_attachment = models.FileField(upload_to="attachments/")
-    issue = models.ForeignKey(
-        Issue, on_delete=models.CASCADE, related_name="files")
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name="files")
 
     def __str__(self):
         return os.path.basename(self.file_attachment.name)
+
 
 # Note: custom fields in Issue init causes infinite loop during cascade deletion
 # Empty pre_delete signal fixes this issue...
@@ -122,6 +121,7 @@ class IssueAttachment(models.Model):
 @receiver(pre_delete, sender=Issue)
 def clean_custom_fields(sender, instance, **kwargs):
     pass
+
 
 @receiver(post_delete, sender=IssueAttachment)
 def issue_attachment_delete(sender, instance, **kwargs):

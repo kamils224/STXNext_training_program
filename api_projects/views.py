@@ -10,7 +10,11 @@ from rest_framework.decorators import action
 
 
 from api_projects.models import Project, Issue, IssueAttachment
-from api_projects.serializers import ProjectSerializer, IssueSerializer, IssueAttachmentSerializer
+from api_projects.serializers import (
+    ProjectSerializer,
+    IssueSerializer,
+    IssueAttachmentSerializer,
+)
 from api_projects.permissions import (
     IsOwner,
     MemberReadOnly,

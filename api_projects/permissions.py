@@ -16,7 +16,8 @@ class IsOwner(BasePermission):
         if isinstance(obj, Issue):
             return obj.owner == user or obj.project.owner == user
         if isinstance(obj, IssueAttachment):
-            return obj.issue.owner == user or obj.issue.project.owner == user 
+            return obj.issue.owner == user or obj.issue.project.owner == user
+
 
 class MemberReadOnly(BasePermission):
     """

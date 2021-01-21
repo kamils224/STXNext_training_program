@@ -32,6 +32,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = "__all__"
+
     owner = serializers.ReadOnlyField(source="owner.pk")
     members = serializers.SerializerMethodField()
     issues = IssueSerializer(many=True, required=False)
