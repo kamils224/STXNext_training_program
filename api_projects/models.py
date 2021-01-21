@@ -1,7 +1,7 @@
-import uuid
+from copy import copy
 
+from django.db.models.signals import pre_save, post_save, pre_delete
 from django.db import models
-from django.db.models import F, Q
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -15,7 +15,8 @@ User = get_user_model()
 class Project(models.Model):
     name = models.CharField(max_length=100)
     owner = models.ForeignKey(
-        User, related_name="own_projects", on_delete=models.CASCADE)
+        User, related_name="own_projects", on_delete=models.CASCADE
+    )
     creation_date = models.DateTimeField(auto_now_add=True)
     members = models.ManyToManyField(User, related_name="projects", blank=True)
 
@@ -42,13 +43,21 @@ class Issue(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     due_date = models.DateTimeField()
     status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.TODO)
+        max_length=20, choices=Status.choices, default=Status.TODO
+    )
     owner = models.ForeignKey(
-        User, related_name="created_issues", on_delete=models.CASCADE)
+        User, related_name="created_issues", on_delete=models.CASCADE
+    )
     assigne = models.ForeignKey(
-        User, related_name="own_issues", on_delete=models.SET_NULL, blank=True, null=True)
+        User,
+        related_name="own_issues",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
     project = models.ForeignKey(
-        Project, related_name="issues", on_delete=models.CASCADE)
+        Project, related_name="issues", on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return self.title
@@ -57,9 +66,11 @@ class Issue(models.Model):
         super(Issue, self).save(*args, **kwargs)
 
         if self._original_assigne != self.assigne:
+            pass
             self._perform_assigne_notification()
 
         if self._original_due_date != self.due_date:
+            pass
             self._perform_deadline_notification()
 
     def _perform_assigne_notification(self) -> str:
@@ -99,3 +110,11 @@ class DateUpdateTask(models.Model):
     issue = models.OneToOneField(
         Issue, on_delete=models.CASCADE, primary_key=True, related_name="issue_task")
     task_id = models.CharField(max_length=50, unique=True, blank=True)
+
+
+# Note: custom fields in Issue init causes infinite loop during cascade deletion
+# Note 2: empty pre_delete signal also fixes this issue...
+@receiver(pre_delete, sender=Issue)
+def clean_custom_fields(sender, instance, **kwargs):
+    delattr(instance, '_original_due_date')
+    delattr(instance, '_original_assigne')
