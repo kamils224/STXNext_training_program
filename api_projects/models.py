@@ -63,11 +63,9 @@ class Issue(models.Model):
         super(Issue, self).save(*args, **kwargs)
 
         if self._original_assigne != self.assigne:
-            pass
             self._perform_assigne_notification()
 
         if self._original_due_date != self.due_date:
-            pass
             self._perform_deadline_notification()
 
     def _perform_assigne_notification(self) -> str:
@@ -90,7 +88,8 @@ class Issue(models.Model):
             current_task, _ = DateUpdateTask.objects.get_or_create(issue=self)
             if current_task.task_id is not None:
                 # remove previous task due to date change
-                app.control.revoke(task_id=current_task.task_id, terminate=True)
+                app.control.revoke(
+                    task_id=current_task.task_id, terminate=True)
 
             subject = "Your task is not completed!"
             message = f"The time for the task {self.title} is over :("
