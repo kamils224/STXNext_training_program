@@ -27,19 +27,6 @@ class MemberReadOnly(BasePermission):
         return request.method in SAFE_METHODS and request.user in obj.members.all()
 
 
-class CanViewIssues(BasePermission):
-    """
-    Checks if current can view issues inside projects.
-    """
-
-    def has_permission(self, request, view):
-        # project id
-        pk = view.kwargs["pk"]
-        projects = request.user.projects.filter(pk=pk).exists()
-        own_projects = request.user.own_projects.filter(pk=pk).exists()
-        return projects or own_projects
-
-
 class IsProjectMember(BasePermission):
     """
     Checks if current user is member or owner of the project.
