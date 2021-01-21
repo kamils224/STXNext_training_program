@@ -3,7 +3,7 @@ Create .env.dev file based on .env-template
 
 Perform makemigrations:
 
-`sudo docker-compose run app python manage.py makemigrations`
+`sudo docker-compose run app python manage.py makemigrations accounts api_projects`
 
 Perform migration:
 
