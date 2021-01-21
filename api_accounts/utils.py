@@ -3,12 +3,9 @@ from typing import Optional
 from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth import get_user_model
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.core.mail import send_mail
 from rest_framework.request import Request
 from rest_framework.reverse import reverse
-from smtplib import SMTPException
+
 
 __all__ = ["VerificationTokenGenerator", "send_verification_email"]
 

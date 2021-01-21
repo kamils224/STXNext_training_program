@@ -10,16 +10,51 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - redis
     env_file:
       - ./.env.dev
   db:
     image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+  redis:
+    image: redis:alpine
+    command: redis-server
+    ports: 
+      - "6379:6379"
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
-
+      - $PWD/redis-data:/var/lib/redis
+      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    restart: always
+  celery:
+    build: .
+    command: celery --app=stx_training_program worker -l INFO
+    user: nobody
+    links:
+      - redis
+    volumes:
+      - .:/backend
+    depends_on:
+      - app
+    env_file:
+      - ./.env.dev
+  celery-beat:
+    build: .
+    command: celery -A stx_training_program beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    user: nobody
+    links:
+      - redis
+    volumes:
+      - .:/backend
+    depends_on:
+      - app
+    env_file:
+      - ./.env.dev
 volumes:
   postgres_data:
