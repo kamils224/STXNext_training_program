@@ -1,14 +1,13 @@
-from functools import wraps
-from dataclasses import dataclass
+from celery import shared_task
 
 from django.apps import apps
 from django.core.mail import send_mail
-from celery import shared_task
 
 
 @shared_task
 def send_issue_notification(email: str, subject: str, message: str) -> None:
-    send_mail(subject, message, None, recipient_list=[email], fail_silently=False)
+    send_mail(subject, message, None, recipient_list=[
+              email], fail_silently=False)
 
 
 @shared_task
