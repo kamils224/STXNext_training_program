@@ -23,7 +23,6 @@ class Project(models.Model):
 
 
 class Issue(models.Model):
-
     def __init__(self, *args, **kwargs):
         super(Issue, self).__init__(*args, **kwargs)
         # save these values before update
@@ -76,29 +75,27 @@ class Issue(models.Model):
             send_issue_notification.delay(
                 self.assigne.email,
                 "New assignment",
-                f"You are assigned to the task {self.title}")
+                f"You are assigned to the task {self.title}",
+            )
 
         if self._original_assigne is not None:
             send_issue_notification.delay(
                 self.assigne.email,
                 "Assigment is removed",
-                f"You were removed from task {self.title}")
+                f"You were removed from task {self.title}",
+            )
 
     def _perform_deadline_notification(self):
         if self.assigne:
             current_task, _ = DateUpdateTask.objects.get_or_create(issue=self)
             if current_task.task_id is not None:
                 # remove previous task due to date change
-                app.control.revoke(
-                    task_id=current_task.task_id, terminate=True)
+                app.control.revoke(task_id=current_task.task_id, terminate=True)
 
             subject = "Your task is not completed!"
             message = f"The time for the task {self.title} is over :("
             current_task.task_id = notify_issue_deadline.s(
-                self.pk,
-                self.assigne.email,
-                subject,
-                message
+                self.pk, self.assigne.email, subject, message
             ).apply_async(eta=self.due_date)
             current_task.save()
 
@@ -106,7 +103,8 @@ class Issue(models.Model):
 # Can be extended / changed as more tasks are needed
 class DateUpdateTask(models.Model):
     issue = models.OneToOneField(
-        Issue, on_delete=models.CASCADE, primary_key=True, related_name="issue_task")
+        Issue, on_delete=models.CASCADE, primary_key=True, related_name="issue_task"
+    )
     task_id = models.CharField(max_length=50, unique=True, blank=True)
 
 
@@ -114,5 +112,5 @@ class DateUpdateTask(models.Model):
 # Note 2: empty pre_delete signal also fixes this issue...
 @receiver(pre_delete, sender=Issue)
 def clean_custom_fields(sender, instance, **kwargs):
-    delattr(instance, '_original_due_date')
-    delattr(instance, '_original_assigne')
+    delattr(instance, "_original_due_date")
+    delattr(instance, "_original_assigne")

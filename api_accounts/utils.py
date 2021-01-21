@@ -31,8 +31,7 @@ def send_verification_email(
 
     message += _create_activation_url(uid, token, request)
     # The sender is set in DEFAULT_FROM_EMAIL in settings.py
-    send_mail(subject, message, None, recipient_list=[
-              user.email], fail_silently=False)
+    send_mail(subject, message, None, recipient_list=[user.email], fail_silently=False)
 
 
 def _create_activation_url(uid: str, token: str, request: Request) -> str:
