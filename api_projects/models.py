@@ -1,12 +1,13 @@
-from api_projects.tasks import send_issue_notification, notify_issue_deadline
-from stx_training_program.celery import app
-from django.dispatch import receiver
-from django.contrib.auth import get_user_model
-from django.db.models.signals import pre_save, post_save, pre_delete
-from django.db.models import Q
-from django.db.models.signals import post_delete
-from django.db import models
+from django.db.models.signals import post_save
 import os
+from django.db import models
+from django.db.models.signals import post_delete
+from django.db.models import Q
+from django.db.models.signals import pre_save, post_save, pre_delete
+from django.contrib.auth import get_user_model
+from django.dispatch import receiver
+from stx_training_program.celery import app
+from api_projects.tasks import send_issue_notification, notify_issue_deadline
 
 
 User = get_user_model()
@@ -77,6 +78,7 @@ class Issue(models.Model):
                 "New assignment",
                 f"You are assigned to the task {self.title}",
             )
+
         if self._original_assigne is not None:
             send_issue_notification.delay(
                 self.assigne.email,
