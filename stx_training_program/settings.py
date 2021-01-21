@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "api_accounts",
     "api_projects",
     "django_celery_beat",
+    "tinymce",
 ]
 
 MIDDLEWARE = [
