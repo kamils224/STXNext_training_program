@@ -63,6 +63,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DATETIME_FORMAT": "iso-8601",
 }
 
 # settings from https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html

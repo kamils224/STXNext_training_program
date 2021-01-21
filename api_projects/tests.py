@@ -1,19 +1,18 @@
 from typing import Dict
+from datetime import datetime
 
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 from rest_framework.reverse import reverse_lazy, reverse
 from rest_framework import status
 
-from api_projects.models import Project
+from api_projects.models import Project, Issue
 
 
 User = get_user_model()
 
-# NOTE: It's better option to create some test fixtures in future
 
-
-class UserProjectsTest(APITestCase):
+class ProjectsTest(APITestCase):
 
     OBTAIN_TOKEN_URL = reverse_lazy("api_accounts:token_obtain_pair")
 
@@ -51,6 +50,15 @@ class UserProjectsTest(APITestCase):
 
         Project.objects.create(name="Project1 without members", owner=self.users[0])
         Project.objects.create(name="Project2 empty", owner=self.users[1])
+
+        example_date = datetime(2030, 10, 10, hour=12, minute=30)
+        Issue.objects.create(
+            title="Issue 1",
+            description="Desc...",
+            owner=members[0],
+            project=project_1,
+            due_date=example_date,
+        )
 
     def setUp(self):
         self._init_db()
@@ -104,6 +112,10 @@ class UserProjectsTest(APITestCase):
 
         self.assertEqual(response_ok.status_code, status.HTTP_200_OK)
         self.assertEqual(response_bad.status_code, status.HTTP_404_NOT_FOUND)
+
+        issues_count = Issue.objects.filter(project=project).count()
+        response_issues = response_ok.data["issues"]
+        self.assertEqual(len(response_issues), issues_count)
 
     def test_create_project(self):
         url = reverse(self.PROJECT_LIST)
