@@ -1,14 +1,13 @@
+from api_projects.tasks import send_issue_notification, notify_issue_deadline
+from stx_training_program.celery import app
+from django.dispatch import receiver
+from django.contrib.auth import get_user_model
+from django.db.models.signals import pre_save, post_save, pre_delete
+from django.db.models import Q
+from django.db.models.signals import post_delete
+from django.db import models
 import os
 
-from django.db import models
-from django.db.models.signals import post_delete
-from django.db.models import Q
-from django.contrib.auth import get_user_model
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
-from stx_training_program.celery import app
-
-from api_projects.tasks import send_issue_notification, notify_issue_deadline
 
 User = get_user_model()
 
@@ -78,8 +77,7 @@ class Issue(models.Model):
                 "New assignment",
                 f"You are assigned to the task {self.title}",
             )
-
-        if self._original_due_date is not None:
+        if self._original_assigne is not None:
             send_issue_notification.delay(
                 self.assigne.email,
                 "Assigment is removed",
@@ -102,9 +100,11 @@ class Issue(models.Model):
             current_task.save()
 
 
+# Can be extended / changed as more tasks are needed
 class DateUpdateTask(models.Model):
     issue = models.OneToOneField(
-        Issue, on_delete=models.CASCADE, primary_key=True)
+        Issue, on_delete=models.CASCADE, primary_key=True, related_name="issue_task"
+    )
     task_id = models.CharField(max_length=50, unique=True, blank=True)
 
 
@@ -116,6 +116,12 @@ class IssueAttachment(models.Model):
     def __str__(self):
         return os.path.basename(self.file_attachment.name)
 
+# Note: custom fields in Issue init causes infinite loop during cascade deletion
+# Empty pre_delete signal fixes this issue...
+# source: https://code.djangoproject.com/ticket/31475
+@receiver(pre_delete, sender=Issue)
+def clean_custom_fields(sender, instance, **kwargs):
+    pass
 
 @receiver(post_delete, sender=IssueAttachment)
 def issue_attachment_delete(sender, instance, **kwargs):

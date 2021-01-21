@@ -10,7 +10,7 @@ from rest_framework.request import Request
 from rest_framework.reverse import reverse
 
 
-__all__ = ["VerificationTokenGenerator", "create_activation_url"]
+__all__ = ["VerificationTokenGenerator", "send_verification_email"]
 
 
 User = get_user_model()
@@ -38,7 +38,7 @@ def send_verification_email(
               user.email], fail_silently=False)
 
 
-def create_activation_url(uid: str, token: str, request: Request) -> str:
+def _create_activation_url(uid: str, token: str, request: Request) -> str:
     endpoint = reverse("api_accounts:activate")
     protocol = "https" if request.is_secure() else "http"
     host = request.get_host()
