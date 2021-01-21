@@ -168,12 +168,11 @@ class ProjectsTest(APITestCase):
 
         self._login_user(user)
         response_ok = self.client.delete(url)
-        print(response_ok)
-        #projects_count_delete = Project.objects.count()
+        projects_count_delete = Project.objects.count()
 
-        # self.assertEqual(projects_count_non_auth_delete, projects_init_count)
-        # self.assertEqual(response_bad.status_code,
-        #                  status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(projects_count_non_auth_delete, projects_init_count)
+        self.assertEqual(response_bad.status_code,
+                         status.HTTP_401_UNAUTHORIZED)
 
-        # self.assertEqual(projects_count_delete, projects_init_count - 1)
-        # self.assertEqual(response_ok.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(projects_count_delete, projects_init_count - 1)
+        self.assertEqual(response_ok.status_code, status.HTTP_204_NO_CONTENT)
