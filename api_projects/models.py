@@ -1,10 +1,7 @@
 import os
 
-from django.db.models.signals import post_save
 from django.db import models
-from django.db.models.signals import post_delete
-from django.db.models import Q
-from django.db.models.signals import pre_save, post_save, pre_delete
+from django.db.models.signals import post_delete, pre_delete
 from django.contrib.auth import get_user_model
 from django.dispatch import receiver
 
