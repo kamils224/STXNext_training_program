@@ -2,7 +2,7 @@ import os
 
 from django.db import models
 from django.db.models.signals import post_delete
-from django.db.models import F, Q
+from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
@@ -29,8 +29,8 @@ class Issue(models.Model):
     def __init__(self, *args, **kwargs):
         super(Issue, self).__init__(*args, **kwargs)
         # save these values before update
-        self.__original_due_date = self.due_date
-        self.__original_assigne = self.assigne
+        self._original_due_date = self.due_date
+        self._original_assigne = self.assigne
 
     class Status(models.TextChoices):
         TODO = "todo"
@@ -65,10 +65,10 @@ class Issue(models.Model):
     def save(self, *args, **kwargs):
         super(Issue, self).save(*args, **kwargs)
 
-        if self.__original_assigne != self.assigne:
+        if self._original_assigne != self.assigne:
             self._perform_assigne_notification()
 
-        if self.__original_due_date != self.due_date:
+        if self._original_due_date != self.due_date:
             self._perform_deadline_notification()
 
     def _perform_assigne_notification(self) -> str:
@@ -79,7 +79,7 @@ class Issue(models.Model):
                 f"You are assigned to the task {self.title}",
             )
 
-        if self.__original_due_date is not None:
+        if self._original_due_date is not None:
             send_issue_notification.delay(
                 self.assigne.email,
                 "Assigment is removed",
@@ -91,7 +91,8 @@ class Issue(models.Model):
             current_task, _ = DateUpdateTask.objects.get_or_create(issue=self)
             if current_task.task_id is not None:
                 # remove previous task due to date change
-                app.control.revoke(task_id=current_task.task_id, terminate=True)
+                app.control.revoke(
+                    task_id=current_task.task_id, terminate=True)
 
             subject = "Your task is not completed!"
             message = f"The time for the task {self.title} is over :("
@@ -102,13 +103,15 @@ class Issue(models.Model):
 
 
 class DateUpdateTask(models.Model):
-    issue = models.OneToOneField(Issue, on_delete=models.CASCADE, primary_key=True)
+    issue = models.OneToOneField(
+        Issue, on_delete=models.CASCADE, primary_key=True)
     task_id = models.CharField(max_length=50, unique=True, blank=True)
 
 
 class IssueAttachment(models.Model):
     file_attachment = models.FileField(upload_to="attachments/")
-    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name="files")
+    issue = models.ForeignKey(
+        Issue, on_delete=models.CASCADE, related_name="files")
 
     def __str__(self):
         return os.path.basename(self.file_attachment.name)
