@@ -15,8 +15,7 @@ def notify_issue_deadline(pk: int, email: str, subject: str, message: str) -> No
     # to prevent circular imports
     from api_projects.models import Issue
 
-    issue = Issue.objects.get(pk=pk)
-    if issue.status != issue.Status.DONE and issue.assigne is not None:
+    if issue := Issue.objects.filter(pk=pk).exclude(assigne=None, status=Issue.Status.DONE).first():
         send_issue_notification(
             email,
             "Issue deadline",
