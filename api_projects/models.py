@@ -108,8 +108,8 @@ class DateUpdateTask(models.Model):
 
 
 # Note: custom fields in Issue init causes infinite loop during cascade deletion
-# Note 2: empty pre_delete signal also fixes this issue...
+# Empty pre_delete signal fixes this issue...
+# source: https://code.djangoproject.com/ticket/31475
 @receiver(pre_delete, sender=Issue)
 def clean_custom_fields(sender, instance, **kwargs):
-    delattr(instance, "_original_due_date")
-    delattr(instance, "_original_assigne")
+    pass
