@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from api_accounts.models import User
-
 from api_projects.models import Project, Issue, IssueAttachment
 
 
