@@ -61,17 +61,19 @@ class Query(graphene.ObjectType):
 
 class CreateProjectMutation(graphene.Mutation):
     name = graphene.String()
+    members = graphene.ID()
 
     class Arguments:
         name = graphene.String(required=True)
+        members = graphene.List(graphene.ID)
 
     @classmethod
     def mutate(cls, root, info, **kwargs):
         user = info.context.user
+        print(kwargs)
         serializer = ProjectSerializer(data=kwargs)
         if serializer.is_valid():
             obj = serializer.save(owner=user)
-            print(obj)
             return cls(name=obj)
         return cls(name=None)
 

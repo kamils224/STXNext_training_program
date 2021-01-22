@@ -35,6 +35,11 @@ class ProjectViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+    def perform_update(self, serializer):
+        print(self.request.data)
+        serializer.save(members=self.request.data["members"])
+        # super().perform_update()
+
 
 class IssueViewSet(ModelViewSet):
     queryset = Issue.objects.all()
