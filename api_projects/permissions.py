@@ -1,6 +1,6 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
-from api_projects.models import Project, Issue
+from api_projects.models import Project, Issue, IssueAttachment
 
 
 class IsOwner(BasePermission):
@@ -15,6 +15,8 @@ class IsOwner(BasePermission):
             return obj.owner == user
         if isinstance(obj, Issue):
             return obj.owner == user or obj.project.owner == user
+        if isinstance(obj, IssueAttachment):
+            return obj.issue.owner == user or obj.issue.project.owner == user
 
 
 class MemberReadOnly(BasePermission):
@@ -29,7 +31,7 @@ class MemberReadOnly(BasePermission):
 
 class IsProjectMember(BasePermission):
     """
-    Checks if current user is member or owner of the project.
+    Checks if current user is member of the project.
     """
 
     def has_object_permission(self, request, view, obj):
@@ -38,3 +40,5 @@ class IsProjectMember(BasePermission):
             return obj.project in request.user.projects.all()
         if isinstance(obj, Project):
             return obj in request.user.projects.all()
+        if isinstance(obj, IssueAttachment):
+            return obj.issue.project in request.user.projects.all()

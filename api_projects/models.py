@@ -1,11 +1,13 @@
-from django.db.models.signals import pre_save, post_save, pre_delete
-from django.db import models
-from django.contrib.auth import get_user_model
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from stx_training_program.celery import app
+import os
 
+from django.db import models
+from django.db.models.signals import post_delete, pre_delete
+from django.contrib.auth import get_user_model
+from django.dispatch import receiver
+
+from stx_training_program.celery import app
 from api_projects.tasks import send_issue_notification, notify_issue_deadline
+
 
 User = get_user_model()
 
@@ -107,9 +109,23 @@ class DateUpdateTask(models.Model):
     task_id = models.CharField(max_length=50, unique=True, blank=True)
 
 
+class IssueAttachment(models.Model):
+    file_attachment = models.FileField(upload_to="attachments/")
+    issue = models.ForeignKey(
+        Issue, on_delete=models.CASCADE, related_name="files")
+
+    def __str__(self):
+        return os.path.basename(self.file_attachment.name)
+
+
 # Note: custom fields in Issue init causes infinite loop during cascade deletion
 # Empty pre_delete signal fixes this issue...
 # source: https://code.djangoproject.com/ticket/31475
 @receiver(pre_delete, sender=Issue)
 def clean_custom_fields(sender, instance, **kwargs):
     pass
+
+
+@receiver(post_delete, sender=IssueAttachment)
+def issue_attachment_delete(sender, instance, **kwargs):
+    instance.file_attachment.delete(save=False)

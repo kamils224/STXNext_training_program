@@ -1,14 +1,13 @@
-from functools import wraps
-from dataclasses import dataclass
+from celery import shared_task
 
 from django.apps import apps
 from django.core.mail import send_mail
-from celery import shared_task
 
 
 @shared_task
 def send_issue_notification(email: str, subject: str, message: str) -> None:
-    send_mail(subject, message, None, recipient_list=[email], fail_silently=False)
+    send_mail(subject, message, None, recipient_list=[
+              email], fail_silently=False)
 
 
 @shared_task
@@ -16,8 +15,7 @@ def notify_issue_deadline(pk: int, email: str, subject: str, message: str) -> No
     # to prevent circular imports
     from api_projects.models import Issue
 
-    issue = Issue.objects.get(pk=pk)
-    if issue.status != issue.Status.DONE and issue.assigne is not None:
+    if issue := Issue.objects.filter(pk=pk).exclude(assigne=None, status=Issue.Status.DONE).first():
         send_issue_notification(
             email,
             "Issue deadline",
