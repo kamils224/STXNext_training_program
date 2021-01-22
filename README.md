@@ -21,4 +21,7 @@ If migration errors occur, remove your database volumes and try again.
 
 `sudo docker-compose down --rmi all --volumes`
 
+If redis is already running, try:
+`sudo service redis-server stop`
+
 *TODO*
