@@ -36,9 +36,9 @@ class ProjectViewSet(ModelViewSet):
         serializer.save(owner=self.request.user)
 
     def perform_update(self, serializer):
-        print(self.request.data)
-        serializer.save(members=self.request.data["members"])
-        # super().perform_update()
+        if members := self.request.data.get("members", None):
+            serializer.save(members=members)
+        serializer.save()
 
 
 class IssueViewSet(ModelViewSet):

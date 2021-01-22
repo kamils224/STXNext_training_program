@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from api_accounts.serializers import UserSerializer
+from api_accounts.models import User
+
 from api_projects.models import Project, Issue, IssueAttachment
 
 
@@ -35,7 +36,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source="owner.pk")
     members = serializers.SerializerMethodField()
-    issues = IssueSerializer(many=True, required=False)
+    issues = IssueSerializer(many=True, required=False, read_only=True)
 
     def get_members(self, project):
         # possibility to extend returned values
