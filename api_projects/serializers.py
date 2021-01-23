@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
+from api_accounts.models import User
 from api_projects.models import Project, Issue, IssueAttachment
 
 
@@ -31,12 +32,15 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = "__all__"
+        extra_kwargs = {
+            'members': {'write_only': True}
+        }
 
     owner = serializers.ReadOnlyField(source="owner.pk")
-    members = serializers.SerializerMethodField()
     issues = IssueSerializer(many=True, required=False, read_only=True)
+    members_emails = serializers.SerializerMethodField()
 
-    def get_members(self, project):
+    def get_members_emails(self, project):
         # possibility to extend returned values
         return project.members.values("id", "email")
 
