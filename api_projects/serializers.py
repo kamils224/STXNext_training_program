@@ -32,9 +32,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = "__all__"
-        extra_kwargs = {
-            'members': {'write_only': True}
-        }
+        extra_kwargs = {"members": {"write_only": True}}
 
     owner = serializers.ReadOnlyField(source="owner.pk")
     issues = IssueSerializer(many=True, required=False, read_only=True)
