@@ -128,7 +128,7 @@ class IssueMutation(graphene.Mutation):
         )
 
 
-class IssueAttachmentMutation(graphene.ObjectType):
+class IssueAttachmentMutation(graphene.Mutation):
     class Arguments:
         attachment = Upload(required=True)
         issue = graphene.ID(required=True)
