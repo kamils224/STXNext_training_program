@@ -12,8 +12,7 @@ from api_projects.serializers import (
     IssueSerializer,
     IssueAttachmentSerializer,
 )
-
-# Note: because of the large number of classes, consider separated files in future
+# Note: because of the large number of classes, consider separated files in future.
 
 
 class ProjectNode(DjangoObjectType):
