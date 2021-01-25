@@ -155,7 +155,7 @@ class IssueAttachmentMutation(graphene.Mutation):
 
         attachments = [
             IssueAttachment(file_attachment=attachment, issue=issue)
-            for _, attachment in files.items()
+            for attachment in files.values()
         ]
         created = IssueAttachment.objects.bulk_create(attachments)
         return cls(attachment=created)
