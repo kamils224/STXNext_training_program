@@ -78,7 +78,16 @@ class CreateProjectInput(graphene.InputObjectType):
     members = graphene.List(graphene.ID)
 
 
-class ProjectMutation(graphene.Mutation):
+class UpdateProjectInput(CreateProjectInput):
+    pk = graphene.ID(required=True)
+    name = graphene.String(required=False)
+
+
+class DeleteProjectInput(graphene.InputObjectType):
+    pk = graphene.ID()
+
+
+class CreateProjectMutation(graphene.Mutation):
     class Arguments:
         project_data = CreateProjectInput(required=True)
 
@@ -94,6 +103,32 @@ class ProjectMutation(graphene.Mutation):
         serializer.is_valid(raise_exception=True)
         obj = serializer.save(owner=user)
         return cls(pk=obj.pk, name=obj.name, members=obj.members.all(), owner=obj.owner)
+
+
+class UpdateProjectMutation(CreateProjectMutation):
+    class Arguments:
+        project_data = UpdateProjectInput(required=True)
+
+    @classmethod
+    def mutate(cls, root, info, project_data=None, **kwargs):
+        project = get_object_or_404(Project, pk=project_data.pk)
+        serializer = ProjectSerializer(project, data=project_data)
+        serializer.is_valid(raise_exception=True)
+        obj = serializer.save()
+        return cls(pk=obj.pk, name=obj.name, members=obj.members.all(), owner=obj.owner)
+
+
+class DeleteProjectMutation(graphene.Mutation):
+    class Arguments:
+        project_data = DeleteProjectInput(required=True)
+
+    message = graphene.String()
+
+    @classmethod
+    def mutate(cls, root, info, project_data=None, **kwargs):
+        project = get_object_or_404(Project, pk=project_data.pk)
+        project.delete()
+        return cls(message=f"Deleted object with pk: {[project_data.pk]}.")
 
 
 class CreateIssueInput(graphene.InputObjectType):
@@ -153,6 +188,7 @@ class IssueAttachmentMutation(graphene.Mutation):
         issue = get_object_or_404(Issue, pk=attachment_data.issue)
         files = info.context.FILES
 
+        # allows to save multiple files at once
         attachments = [
             IssueAttachment(file_attachment=attachment, issue=issue)
             for attachment in files.values()
@@ -162,6 +198,8 @@ class IssueAttachmentMutation(graphene.Mutation):
 
 
 class Mutation(graphene.ObjectType):
-    create_project = ProjectMutation.Field()
+    create_project = CreateProjectMutation.Field()
+    update_project = UpdateProjectMutation.Field()
+    delete_project = DeleteProjectMutation.Field()
     create_issue = IssueMutation.Field()
     upload_attachment = IssueAttachmentMutation.Field()
