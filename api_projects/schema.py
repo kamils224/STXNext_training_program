@@ -3,6 +3,8 @@ from rest_framework import status
 from graphene.relay import Node
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphene_file_upload.scalars import Upload
+
 
 from api_accounts.schema import UserNode
 from api_projects.models import Project, Issue, IssueAttachment
@@ -14,8 +16,6 @@ from api_projects.serializers import (
 
 
 class ProjectNode(DjangoObjectType):
-    pk = graphene.Int(source="pk")
-
     class Meta:
         model = Project
         filter_fields = {
@@ -24,10 +24,10 @@ class ProjectNode(DjangoObjectType):
         }
         interfaces = (Node,)
 
-
-class IssueNode(DjangoObjectType):
     pk = graphene.Int(source="pk")
 
+
+class IssueNode(DjangoObjectType):
     class Meta:
         model = Issue
         filter_fields = {
@@ -38,17 +38,19 @@ class IssueNode(DjangoObjectType):
         }
         interfaces = (Node,)
 
+    pk = graphene.Int(source="pk")
+
 
 class IssueAttachmentNode(DjangoObjectType):
-    pk = graphene.Int(source="pk")
-    url = graphene.String()
-    filename = graphene.String()
-
     class Meta:
         fields = ["issue", "url", "filename"]
         model = IssueAttachment
         filter_fields = ["issue"]
         interfaces = (Node,)
+
+    pk = graphene.Int(source="pk")
+    url = graphene.String()
+    filename = graphene.String()
 
     def resolve_url(parent, info):
         meta = info.context.META
@@ -72,13 +74,14 @@ class Query(graphene.ObjectType):
 
 
 class ProjectMutation(graphene.Mutation):
+    class Arguments:
+        pk = graphene.ID()
+        name = graphene.String(required=True)
+        members = graphene.List(graphene.ID)
+
     name = graphene.String()
     members = graphene.List(UserNode)
     owner = graphene.Field(UserNode)
-
-    class Arguments:
-        name = graphene.String(required=True)
-        members = graphene.List(graphene.ID)
 
     @classmethod
     def mutate(cls, root, info, **kwargs):
@@ -90,6 +93,15 @@ class ProjectMutation(graphene.Mutation):
 
 
 class IssueMutation(graphene.Mutation):
+    class Arguments:
+        pk = graphene.ID()
+        title = graphene.String(required=True)
+        description = graphene.String()
+        due_date = graphene.DateTime(required=True)
+        status = graphene.String()
+        assigne = graphene.ID()
+        project = graphene.ID()
+
     title = graphene.String()
     description = graphene.String()
     due_date = graphene.DateTime()
@@ -98,21 +110,13 @@ class IssueMutation(graphene.Mutation):
     assigne = graphene.Field(UserNode)
     project = graphene.Field(ProjectNode)
 
-    class Arguments:
-        title = graphene.String(required=True)
-        description = graphene.String()
-        due_date = graphene.DateTime(required=True)
-        status = graphene.String()
-        assigne = graphene.ID()
-        project = graphene.ID()
-
     @classmethod
     def mutate(cls, root, info, **kwargs):
         user = info.context.user
         serializer = IssueSerializer(data=kwargs)
         serializer.is_valid(raise_exception=True)
         obj = serializer.save(owner=user)
-        print(obj.owner)
+
         return cls(
             title=obj.title,
             description=obj.description,
@@ -124,6 +128,22 @@ class IssueMutation(graphene.Mutation):
         )
 
 
+class IssueAttachmentMutation(graphene.ObjectType):
+    class Arguments:
+        attachment = Upload(required=True)
+        issue = graphene.ID(required=True)
+
+    success = graphene.Boolean()
+
+    @classmethod
+    def mutate(self, info, attachment, **kwargs):
+        print(attachment)
+        print(kwargs)
+
+        return cls(success=True)
+
+
 class Mutation(graphene.ObjectType):
-    update_project = ProjectMutation.Field()
-    update_issue = IssueMutation.Field()
+    create_project = ProjectMutation.Field()
+    create_issue = IssueMutation.Field()
+    upload_attachment = IssueAttachmentMutation.Field()

@@ -190,6 +190,6 @@ CELERY_TIMEZONE = "UTC"
 
 
 GRAPHENE = {
-    "SCHEMA": "cookbook.schema.schema",
+    "SCHEMA": "stx_training_program.schema.schema",
     "ATOMIC_MUTATIONS": True,
 }

@@ -19,6 +19,7 @@ from django.views.static import serve
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from graphene_django.views import GraphQLView
+from graphene_file_upload.django import FileUploadGraphQLView
 
 from stx_training_program.schema import schema
 
@@ -33,5 +34,6 @@ urlpatterns = [
             "document_root": settings.MEDIA_ROOT,
         },
     ),
-    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),
+    path(r"graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),
+    path(r"graphql-file/", FileUploadGraphQLView.as_view(graphiql=True)),
 ]
