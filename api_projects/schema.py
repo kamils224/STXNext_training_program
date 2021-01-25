@@ -1,13 +1,9 @@
-from abc import ABCMeta, abstractmethod
-
 import graphene
 from django.shortcuts import get_object_or_404
 from django.forms.models import model_to_dict
-from rest_framework import status
 from graphene.relay import Node
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from graphene_file_upload.scalars import Upload
 
 from api_accounts.schema import UserNode
 from api_projects.models import Project, Issue, IssueAttachment
@@ -16,6 +12,8 @@ from api_projects.serializers import (
     IssueSerializer,
     IssueAttachmentSerializer,
 )
+
+# Note: because of the large number of classes, consider separated files in future
 
 
 class ProjectNode(DjangoObjectType):
