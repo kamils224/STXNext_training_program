@@ -102,9 +102,11 @@ class CreateProjectMutation(graphene.Mutation):
     @classmethod
     def mutate(cls, root, info, project_data=None, **kwargs):
         user = info.context.user
+
         serializer = ProjectSerializer(data=project_data)
         serializer.is_valid(raise_exception=True)
         obj = serializer.save(owner=user)
+
         return cls(pk=obj.pk, name=obj.name, members=obj.members.all(), owner=obj.owner)
 
 
@@ -115,9 +117,11 @@ class UpdateProjectMutation(CreateProjectMutation):
     @classmethod
     def mutate(cls, root, info, project_data=None, **kwargs):
         project = get_object_or_404(Project, pk=project_data.pk)
+
         serializer = ProjectSerializer(project, data=project_data)
         serializer.is_valid(raise_exception=True)
         obj = serializer.save()
+
         return cls(pk=obj.pk, name=obj.name, members=obj.members.all(), owner=obj.owner)
 
 
@@ -184,7 +188,6 @@ class UpdateIssueMutation(CreateIssueMutation):
 
         serializer = IssueSerializer(issue, data=instance_dict)
         serializer.is_valid(raise_exception=True)
-
         obj = serializer.save()
 
         return cls(
@@ -231,7 +234,8 @@ class DeleteObjectMutation(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, data=None, **kwargs):
-        raise NotImplementedError("Inherited classes must implement this method.")
+        raise NotImplementedError(
+            "Inherited classes must implement this method.")
 
 
 class DeleteProjectMutation(DeleteObjectMutation):
