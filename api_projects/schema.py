@@ -1,10 +1,10 @@
 import graphene
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from graphene.relay import Node
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_file_upload.scalars import Upload
-
 
 from api_accounts.schema import UserNode
 from api_projects.models import Project, Issue, IssueAttachment
@@ -53,9 +53,9 @@ class IssueAttachmentNode(DjangoObjectType):
     filename = graphene.String()
 
     def resolve_url(parent, info):
-        meta = info.context.META
-        if "HTTP_HOST" in meta:
-            return f"{meta['HTTP_HOST']}/{parent.file_attachment}"
+        host = info.context.META.get("HTTP_HOST", None)
+        if host is not None:
+            return host + parent.file_attachment.url
         return str(parent.file_attachment)
 
     def resolve_filename(parent, info):
@@ -73,35 +73,43 @@ class Query(graphene.ObjectType):
     all_issue_attachments = DjangoFilterConnectionField(IssueAttachmentNode)
 
 
+class CreateProjectInput(graphene.InputObjectType):
+    name = graphene.String(required=True)
+    members = graphene.List(graphene.ID)
+
+
 class ProjectMutation(graphene.Mutation):
     class Arguments:
-        pk = graphene.ID()
-        name = graphene.String(required=True)
-        members = graphene.List(graphene.ID)
+        project_data = CreateProjectInput(required=True)
 
+    pk = graphene.ID()
     name = graphene.String()
     members = graphene.List(UserNode)
     owner = graphene.Field(UserNode)
 
     @classmethod
-    def mutate(cls, root, info, **kwargs):
+    def mutate(cls, root, info, project_data=None, **kwargs):
         user = info.context.user
-        serializer = ProjectSerializer(data=kwargs)
+        serializer = ProjectSerializer(data=project_data)
         serializer.is_valid(raise_exception=True)
         obj = serializer.save(owner=user)
-        return cls(name=obj.name, members=obj.members.all(), owner=obj.owner)
+        return cls(pk=obj.pk, name=obj.name, members=obj.members.all(), owner=obj.owner)
+
+
+class CreateIssueInput(graphene.InputObjectType):
+    title = graphene.String(required=True)
+    description = graphene.String()
+    due_date = graphene.DateTime(required=True)
+    status = graphene.String()
+    assigne = graphene.ID()
+    project = graphene.ID(required=True)
 
 
 class IssueMutation(graphene.Mutation):
     class Arguments:
-        pk = graphene.ID()
-        title = graphene.String(required=True)
-        description = graphene.String()
-        due_date = graphene.DateTime(required=True)
-        status = graphene.String()
-        assigne = graphene.ID()
-        project = graphene.ID()
+        issue_data = CreateIssueInput(required=True)
 
+    pk = graphene.ID()
     title = graphene.String()
     description = graphene.String()
     due_date = graphene.DateTime()
@@ -111,13 +119,15 @@ class IssueMutation(graphene.Mutation):
     project = graphene.Field(ProjectNode)
 
     @classmethod
-    def mutate(cls, root, info, **kwargs):
+    def mutate(cls, root, info, issue_data=None, **kwargs):
         user = info.context.user
-        serializer = IssueSerializer(data=kwargs)
+        print(issue_data)
+        serializer = IssueSerializer(data=issue_data)
         serializer.is_valid(raise_exception=True)
         obj = serializer.save(owner=user)
 
         return cls(
+            pk=obj.pk,
             title=obj.title,
             description=obj.description,
             due_date=obj.due_date,
@@ -128,19 +138,27 @@ class IssueMutation(graphene.Mutation):
         )
 
 
+class UploadAttachmentInput(graphene.InputObjectType):
+    issue = graphene.ID(required=True)
+
+
 class IssueAttachmentMutation(graphene.Mutation):
     class Arguments:
-        attachment = Upload(required=True)
-        issue = graphene.ID(required=True)
+        attachment_data = UploadAttachmentInput(required=True)
 
-    success = graphene.Boolean()
+    attachment = graphene.List(IssueAttachmentNode)
 
     @classmethod
-    def mutate(self, info, attachment, **kwargs):
-        print(attachment)
-        print(kwargs)
+    def mutate(cls, root, info, attachment_data, **kwargs):
+        issue = get_object_or_404(Issue, pk=attachment_data.issue)
+        files = info.context.FILES
 
-        return cls(success=True)
+        attachments = [
+            IssueAttachment(file_attachment=attachment, issue=issue)
+            for _, attachment in files.items()
+        ]
+        created = IssueAttachment.objects.bulk_create(attachments)
+        return cls(attachment=created)
 
 
 class Mutation(graphene.ObjectType):
