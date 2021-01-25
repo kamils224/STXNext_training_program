@@ -47,3 +47,4 @@ class IssueAttachmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = IssueAttachment
         fields = "__all__"
+        extra_kwargs = {"due_date": {"required": False}}
