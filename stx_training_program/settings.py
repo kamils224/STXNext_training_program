@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "graphene_django",
     "accounts",
     "api_accounts",
     "api_projects",
@@ -186,3 +187,9 @@ CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
+
+
+GRAPHENE = {
+    "SCHEMA": "stx_training_program.schema.schema",
+    "ATOMIC_MUTATIONS": True,
+}
